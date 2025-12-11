@@ -3,6 +3,8 @@
 > **🍓 QUAN TRỌNG:** Toàn bộ hệ thống chạy **HOÀN TOÀN trên Raspberry Pi 4 (8GB RAM)**!  
 > Không cần PC/Laptop riêng. Training, deployment, web interface - TẤT CẢ trên Pi!  
 > Xem chi tiết: **[EVERYTHING_ON_PI4.md](docs/EVERYTHING_ON_PI4.md)** ⚡
+> 
+> 📋 **Updates:** Xem [CHANGELOG.md](CHANGELOG.md) - Version 1.0.0 ✅
 
 Hệ thống băng chuyền phân loại hoa quả tươi/hỏng tự động sử dụng AI Camera và Raspberry Pi 4.
 

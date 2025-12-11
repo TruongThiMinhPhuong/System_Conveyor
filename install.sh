@@ -64,6 +64,8 @@ sudo apt-get install -y \
     libqtgui4 \
     libhdf5-dev \
     libhdf5-103 \
+    libcap-dev \
+    libffi-dev \
     git \
     cmake
 

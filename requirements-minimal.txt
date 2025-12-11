@@ -1,0 +1,24 @@
+# Minimal Essential Requirements
+# Cài tối thiểu để hệ thống chạy được
+
+# Core
+numpy
+pillow
+pyyaml
+
+# Computer Vision
+opencv-python
+
+# AI Models
+ultralytics
+
+# Hardware (Pi only)
+RPi.GPIO
+gpiozero
+picamera2
+
+# Web Interface
+flask
+flask-cors
+flask-socketio
+eventlet
