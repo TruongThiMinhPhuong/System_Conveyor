@@ -95,21 +95,34 @@ class ConveyorSystem:
     
     def sort_fruit(
         self,
-        is_fresh: bool,
+        is_fresh: bool = None,
+        is_fruit: bool = True,
         pause_conveyor: bool = True
     ):
         """
-        Execute fruit sorting action
+        Execute sorting action based on object type
         
         Args:
-            is_fresh: True if fruit is fresh, False if spoiled
+            is_fresh: True if fresh, False if spoiled (ignored if not fruit)
+            is_fruit: Whether the detected object is a fruit
             pause_conveyor: Whether to pause conveyor during sorting
         """
         if pause_conveyor:
             self.pause_for_sorting()
         
-        # Move servo to appropriate position
-        self.servo.sort_fruit(is_fresh)
+        # Move servo based on object type
+        if not is_fruit:
+            # Non-fruit object → Turn LEFT (reject bin 1)
+            print("⚠️ Non-fruit object → LEFT")
+            self.servo.move_to_left()
+        elif is_fresh:
+            # Fresh fruit → Go STRAIGHT (center - good bin)
+            print("🍎 Fresh fruit → STRAIGHT")
+            self.servo.move_to_center()
+        else:
+            # Spoiled fruit → Turn RIGHT (reject bin 2)
+            print("🍂 Spoiled fruit → RIGHT")
+            self.servo.move_to_right()
         
         # Wait for mechanical action to complete
         time.sleep(gpio_config.SERVO_MOVE_DELAY)

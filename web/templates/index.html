@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -81,8 +83,8 @@
                     </div>
                     <div class="speed-control">
                         <label for="speed-slider">Speed: <span id="speed-value">60</span>%</label>
-                        <input type="range" id="speed-slider" min="0" max="100" value="60" 
-                               oninput="updateSpeed(this.value)">
+                        <input type="range" id="speed-slider" min="0" max="100" value="60"
+                            oninput="updateSpeed(this.value)">
                     </div>
                 </div>
 
@@ -91,10 +93,10 @@
                     <h2>🔄 Servo Control</h2>
                     <div class="servo-buttons">
                         <button class="btn btn-secondary" onclick="controlServo('left')">
-                            ⬅️ Left (Fresh)
+                            ⬅️ Left (Test)
                         </button>
                         <button class="btn btn-secondary" onclick="controlServo('center')">
-                            ↔️ Center
+                            ↔️ Center (Fresh - Straight)
                         </button>
                         <button class="btn btn-secondary" onclick="controlServo('right')">
                             ➡️ Right (Spoiled)
@@ -141,4 +143,5 @@
 
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
+
 </html>

@@ -45,8 +45,8 @@ System will:
 4. ROI extracted and preprocessed
 5. MobileNetV2 classifies → Fresh/Spoiled
 6. Servo sorts fruit:
-   ├─ Fresh → LEFT
-   └─ Spoiled → RIGHT
+   ├─ Fresh → CENTER (straight path)
+   └─ Spoiled → RIGHT (reject bin)
 7. Conveyor continues
 ```
 

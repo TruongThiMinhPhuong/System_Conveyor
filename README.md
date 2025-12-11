@@ -113,13 +113,16 @@ Chỉnh sửa file `utils/config.py` để tùy chỉnh:
 ## 📊 Quy Trình Hoạt Động
 
 1. Camera chụp ảnh liên tục
-2. YOLOv8 phát hiện hoa quả
-3. Cắt ROI và tiền xử lý ảnh (OpenCV)
-4. MobileNetV2 phân loại tươi/hỏng
-5. Servo điều hướng hoa quả:
-   - **Tươi** → Rẽ trái
-   - **Hỏng** → Rẽ phải
-6. Băng chuyền tiếp tục di chuyển
+2. YOLOv8 phát hiện đối tượng
+3. Phân loại và xử lý:
+   - **Nếu KHÔNG phải hoa quả** → Servo rẽ trái (thùng reject 1)
+   - **Nếu là hoa quả** → Cắt ROI và tiền xử lý (OpenCV)
+   - **MobileNetV2** phân loại tươi/hỏng
+4. Servo điều hướng:
+   - **Hoa quả tươi** → Đi thẳng (servo ở giữa) 🍎
+   - **Hoa quả hỏng** → Rẽ phải (servo sang phải) 🍂
+   - **Vật khác** → Rẽ trái (servo sang trái) ⚠️
+5. Băng chuyền tiếp tục di chuyển
 
 ## 📝 License
 
