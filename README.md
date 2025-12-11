@@ -140,4 +140,4 @@ MIT License
 
 ## 👨‍💻 Tác Giả
 
-AI Fruit Sorting System - 2025
+Development of a Conveyor System for Fruit Quality Classification Using AI Camera - 2025
