@@ -1,5 +1,5 @@
 """
-Main System Orchestration - AI Fruit Sorting System
+Main System Orchestration - Development of a Conveyor System for Fruit Quality Classification Using AI Camera
 Raspberry Pi 4 - YOLOv8 + MobileNetV2
 Run this file to start the fruit sorting system
 """
@@ -286,7 +286,7 @@ def signal_handler(sig, frame):
 def main():
     """Main entry point"""
     print("=" * 60)
-    print("🍎 AI Fruit Sorting Conveyor System")
+    print("🍎 Development of a Conveyor System for Fruit Quality Classification Using AI Camera")
     print("=" * 60)
     
     # Print configuration

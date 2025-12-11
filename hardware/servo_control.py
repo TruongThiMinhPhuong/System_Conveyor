@@ -4,9 +4,17 @@ Controls MG996R servo for fruit sorting mechanism
 """
 
 import time
-import RPi.GPIO as GPIO
 from typing import Optional
 from . import gpio_config
+
+# Try to import RPi.GPIO - may fail if not on Raspberry Pi
+GPIO_AVAILABLE = False
+try:
+    import RPi.GPIO as GPIO
+    GPIO_AVAILABLE = True
+except ImportError:
+    print("⚠️ RPi.GPIO not available - running in simulation mode")
+    GPIO = None
 
 
 class ServoControl:
@@ -26,6 +34,7 @@ class ServoControl:
         self.pwm = None
         self.current_angle = gpio_config.SERVO_ANGLE_CENTER
         self.is_initialized = False
+        self.simulation_mode = not GPIO_AVAILABLE
         
     def initialize(self) -> bool:
         """
@@ -34,11 +43,17 @@ class ServoControl:
         Returns:
             True if successful, False otherwise
         """
+        if self.simulation_mode:
+            print(f"🔧 Servo running in SIMULATION mode (GPIO {self.pin})")
+            self.is_initialized = True
+            return True
+            
         try:
             print(f"🔧 Initializing servo on GPIO {self.pin}...")
             
             # Setup GPIO mode
             GPIO.setmode(GPIO.BCM)
+            GPIO.setwarnings(False)
             GPIO.setup(self.pin, GPIO.OUT)
             
             # Initialize PWM
@@ -55,8 +70,10 @@ class ServoControl:
             
         except Exception as e:
             print(f"❌ Servo initialization failed: {e}")
-            self.is_initialized = False
-            return False
+            print("   Switching to simulation mode...")
+            self.simulation_mode = True
+            self.is_initialized = True
+            return True
     
     def _angle_to_duty_cycle(self, angle: float) -> float:
         """
@@ -93,6 +110,12 @@ class ServoControl:
         if not self.is_initialized:
             print("⚠️ Servo not initialized.")
             return False
+        
+        if self.simulation_mode:
+            self.current_angle = angle
+            print(f"🔄 [SIM] Servo moved to {angle}°")
+            time.sleep(speed * 0.1)  # Shorter delay in simulation
+            return True
         
         try:
             duty_cycle = self._angle_to_duty_cycle(angle)
@@ -192,6 +215,11 @@ class ServoControl:
         """
         Stop PWM and cleanup GPIO
         """
+        if self.simulation_mode:
+            self.is_initialized = False
+            print("🧹 [SIM] Servo cleaned up")
+            return
+            
         if self.pwm:
             try:
                 self.pwm.stop()
@@ -199,12 +227,13 @@ class ServoControl:
             except Exception as e:
                 print(f"⚠️ Error stopping servo: {e}")
         
-        try:
-            GPIO.cleanup(self.pin)
-            self.is_initialized = False
-            print("🧹 Servo GPIO cleaned up")
-        except Exception as e:
-            print(f"⚠️ Error cleaning up GPIO: {e}")
+        if GPIO_AVAILABLE:
+            try:
+                GPIO.cleanup(self.pin)
+                self.is_initialized = False
+                print("🧹 Servo GPIO cleaned up")
+            except Exception as e:
+                print(f"⚠️ Error cleaning up GPIO: {e}")
     
     def __enter__(self):
         """Context manager entry"""

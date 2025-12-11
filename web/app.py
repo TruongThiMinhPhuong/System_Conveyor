@@ -25,7 +25,9 @@ from utils import Config, SystemLogger
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'fruit-sorter-secret-key-2025'
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+
+# Use threading mode - more compatible with Pi environment
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # Global system instance
 system_instance = None
@@ -162,26 +164,35 @@ class WebFruitSorter:
             return frame, None
     
     def run(self):
-        """Main processing loop"""
+        """Main processing loop - optimized for speed"""
         self.is_running = True
         self.start_time = time.time()
         self.conveyor.start_conveyor(Config.CONVEYOR_SPEED_DEFAULT)
         
         frame_count = 0
         fps_start = time.time()
+        last_process_time = 0
         
         while self.is_running:
             try:
+                loop_start = time.time()
+                
                 # Capture frame
                 frame = self.conveyor.capture_image()
                 
                 if frame is None:
-                    time.sleep(0.1)
+                    time.sleep(0.01)
                     continue
                 
-                # Process frame
-                processed_frame, detection = self.process_frame(frame)
-                self.latest_frame = processed_frame
+                # Always update latest frame for streaming
+                self.latest_frame = frame
+                
+                # Process frame only at detection interval
+                if time.time() - last_process_time >= Config.DETECTION_INTERVAL:
+                    processed_frame, detection = self.process_frame(frame)
+                    if processed_frame is not None:
+                        self.latest_frame = processed_frame
+                    last_process_time = time.time()
                 
                 # Calculate FPS
                 frame_count += 1
@@ -194,13 +205,16 @@ class WebFruitSorter:
                     # Emit statistics via SocketIO
                     socketio.emit('stats_update', stats)
                 
-                # Control FPS
-                time.sleep(1.0 / Config.MAX_FPS if Config.MAX_FPS > 0 else 0.1)
+                # Control FPS - adaptive sleep
+                elapsed = time.time() - loop_start
+                target_time = 1.0 / Config.MAX_FPS
+                if elapsed < target_time:
+                    time.sleep(target_time - elapsed)
                 
             except Exception as e:
                 stats['errors'] += 1
                 self.logger.error("Loop error", e)
-                time.sleep(0.5)
+                time.sleep(0.1)
     
     def stop(self):
         """Stop system"""
@@ -210,15 +224,21 @@ class WebFruitSorter:
         self.logger.system_event("System stopped")
     
     def get_frame_jpeg(self):
-        """Get latest frame as JPEG"""
+        """Get latest frame as JPEG with optimized compression"""
         if self.latest_frame is None:
             # Return blank frame
             blank = np.zeros((480, 640, 3), dtype=np.uint8)
             cv2.putText(blank, "No camera feed", (200, 240), 
                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-            ret, jpeg = cv2.imencode('.jpg', blank)
+            ret, jpeg = cv2.imencode('.jpg', blank, [cv2.IMWRITE_JPEG_QUALITY, 70])
         else:
-            ret, jpeg = cv2.imencode('.jpg', self.latest_frame)
+            # Resize if needed for faster streaming
+            frame = self.latest_frame
+            h, w = frame.shape[:2]
+            if w > 640:
+                scale = 640 / w
+                frame = cv2.resize(frame, (640, int(h * scale)))
+            ret, jpeg = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
         
         return jpeg.tobytes() if ret else b''
 
@@ -348,17 +368,28 @@ def reset_stats():
 
 @app.route('/video_feed')
 def video_feed():
-    """Video streaming route"""
+    """Video streaming route - optimized for low latency"""
     def generate():
         global system_instance
+        last_frame_time = 0
+        min_frame_interval = 1.0 / 30  # Max 30 FPS for streaming
         
         while True:
+            current_time = time.time()
+            
+            # Rate limiting
+            if current_time - last_frame_time < min_frame_interval:
+                time.sleep(0.01)
+                continue
+            
             if system_instance and system_instance.latest_frame is not None:
                 frame_jpeg = system_instance.get_frame_jpeg()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame_jpeg + b'\r\n')
+                last_frame_time = current_time
             else:
-                time.sleep(0.1)
+                # Send placeholder when no frame
+                time.sleep(0.05)
     
     return Response(generate(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')

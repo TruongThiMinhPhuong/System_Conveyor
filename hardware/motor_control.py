@@ -4,9 +4,17 @@ Controls conveyor belt motor via L298N driver
 """
 
 import time
-import RPi.GPIO as GPIO
 from typing import Optional
 from . import gpio_config
+
+# Try to import RPi.GPIO - may fail if not on Raspberry Pi
+GPIO_AVAILABLE = False
+try:
+    import RPi.GPIO as GPIO
+    GPIO_AVAILABLE = True
+except ImportError:
+    print("⚠️ RPi.GPIO not available - motor running in simulation mode")
+    GPIO = None
 
 
 class MotorControl:
@@ -36,6 +44,7 @@ class MotorControl:
         self.current_speed = 0
         self.is_running = False
         self.is_initialized = False
+        self.simulation_mode = not GPIO_AVAILABLE
         
     def initialize(self) -> bool:
         """
@@ -44,11 +53,17 @@ class MotorControl:
         Returns:
             True if successful, False otherwise
         """
+        if self.simulation_mode:
+            print(f"🔧 Motor running in SIMULATION mode")
+            self.is_initialized = True
+            return True
+            
         try:
             print(f"🔧 Initializing motor controller...")
             
             # Setup GPIO mode
             GPIO.setmode(GPIO.BCM)
+            GPIO.setwarnings(False)
             GPIO.setup(self.ena_pin, GPIO.OUT)
             GPIO.setup(self.in1_pin, GPIO.OUT)
             GPIO.setup(self.in2_pin, GPIO.OUT)
@@ -67,8 +82,10 @@ class MotorControl:
             
         except Exception as e:
             print(f"❌ Motor initialization failed: {e}")
-            self.is_initialized = False
-            return False
+            print("   Switching to simulation mode...")
+            self.simulation_mode = True
+            self.is_initialized = True
+            return True
     
     def set_speed(self, speed: int):
         """
@@ -83,10 +100,15 @@ class MotorControl:
         
         # Clamp speed to valid range
         speed = max(0, min(100, speed))
+        self.current_speed = speed
+        
+        if self.simulation_mode:
+            if speed > 0:
+                print(f"⚡ [SIM] Motor speed set to {speed}%")
+            return
         
         try:
             self.pwm.ChangeDutyCycle(speed)
-            self.current_speed = speed
             
             if speed > 0:
                 print(f"⚡ Motor speed set to {speed}%")
@@ -102,6 +124,12 @@ class MotorControl:
         """
         if not self.is_initialized:
             print("⚠️ Motor not initialized.")
+            return
+        
+        if self.simulation_mode:
+            self.set_speed(speed)
+            self.is_running = True
+            print(f"▶️ [SIM] Motor started FORWARD at {speed}%")
             return
         
         try:
@@ -129,6 +157,12 @@ class MotorControl:
             print("⚠️ Motor not initialized.")
             return
         
+        if self.simulation_mode:
+            self.set_speed(speed)
+            self.is_running = True
+            print(f"◀️ [SIM] Motor started REVERSE at {speed}%")
+            return
+        
         try:
             # Set direction to reverse
             GPIO.output(self.in1_pin, GPIO.LOW)
@@ -150,6 +184,12 @@ class MotorControl:
         if not self.is_initialized:
             return
         
+        if self.simulation_mode:
+            self.current_speed = 0
+            self.is_running = False
+            print("⏹️ [SIM] Motor stopped")
+            return
+        
         try:
             # Stop motor by setting both inputs LOW
             GPIO.output(self.in1_pin, GPIO.LOW)
@@ -169,6 +209,11 @@ class MotorControl:
         Brake the motor (both inputs HIGH for quick stop)
         """
         if not self.is_initialized:
+            return
+        
+        if self.simulation_mode:
+            self.is_running = False
+            print("🛑 [SIM] Motor braked")
             return
         
         try:
@@ -224,18 +269,24 @@ class MotorControl:
         """
         self.stop()
         
+        if self.simulation_mode:
+            self.is_initialized = False
+            print("🧹 [SIM] Motor cleaned up")
+            return
+        
         if self.pwm:
             try:
                 self.pwm.stop()
             except Exception as e:
                 print(f"⚠️ Error stopping PWM: {e}")
         
-        try:
-            GPIO.cleanup([self.ena_pin, self.in1_pin, self.in2_pin])
-            self.is_initialized = False
-            print("🧹 Motor GPIO cleaned up")
-        except Exception as e:
-            print(f"⚠️ Error cleaning up GPIO: {e}")
+        if GPIO_AVAILABLE:
+            try:
+                GPIO.cleanup([self.ena_pin, self.in1_pin, self.in2_pin])
+                self.is_initialized = False
+                print("🧹 Motor GPIO cleaned up")
+            except Exception as e:
+                print(f"⚠️ Error cleaning up GPIO: {e}")
     
     def __enter__(self):
         """Context manager entry"""

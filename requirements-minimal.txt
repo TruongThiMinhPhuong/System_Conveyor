@@ -1,5 +1,12 @@
-# Minimal Essential Requirements
-# Cài tối thiểu để hệ thống chạy được
+# Minimal Essential Requirements for Raspberry Pi 4
+# Run: pip install -r requirements-minimal.txt
+#
+# NOTE: Create venv with system-site-packages:
+#   python3 -m venv --system-site-packages venv
+#   source venv/bin/activate
+#
+# Also install via apt (for camera support):
+#   sudo apt install python3-libcamera python3-picamera2 python3-rpi.gpio
 
 # Core
 numpy
@@ -11,11 +18,11 @@ opencv-python
 
 # AI Models
 ultralytics
+tflite-runtime
 
-# Hardware (Pi only)
+# Hardware (fallback - prefer apt packages)
 RPi.GPIO
 gpiozero
-picamera2
 
 # Web Interface
 flask

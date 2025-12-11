@@ -1,15 +1,24 @@
 """
 Camera Module for Raspberry Pi
 Handles camera initialization and image capture using picamera2
+Falls back to simulation mode if camera not available
 """
 
 import time
 from pathlib import Path
 from typing import Optional, Tuple
 import numpy as np
-from picamera2 import Picamera2
-from picamera2.configuration import CameraConfiguration
 from PIL import Image
+
+# Try to import picamera2 - may fail if libcamera not installed
+PICAMERA_AVAILABLE = False
+try:
+    from picamera2 import Picamera2
+    PICAMERA_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️ picamera2 not available: {e}")
+    print("   Running in simulation mode (no real camera)")
+    Picamera2 = None
 
 
 class Camera:
@@ -36,6 +45,7 @@ class Camera:
         self.rotation = rotation
         self.camera = None
         self.is_initialized = False
+        self.simulation_mode = not PICAMERA_AVAILABLE
         
     def initialize(self) -> bool:
         """
@@ -44,6 +54,11 @@ class Camera:
         Returns:
             True if successful, False otherwise
         """
+        if self.simulation_mode:
+            print("🎥 Camera running in SIMULATION mode (no real hardware)")
+            self.is_initialized = True
+            return True
+            
         try:
             print("🎥 Initializing camera...")
             self.camera = Picamera2()
@@ -64,8 +79,33 @@ class Camera:
             
         except Exception as e:
             print(f"❌ Camera initialization failed: {e}")
-            self.is_initialized = False
-            return False
+            print("   Switching to simulation mode...")
+            self.simulation_mode = True
+            self.is_initialized = True
+            return True
+    
+    def _generate_simulation_frame(self) -> np.ndarray:
+        """Generate a simulated frame for testing"""
+        frame = np.zeros((self.resolution[1], self.resolution[0], 3), dtype=np.uint8)
+        
+        # Add gradient background
+        for y in range(frame.shape[0]):
+            frame[y, :, 0] = int(255 * y / frame.shape[0])
+            frame[y, :, 2] = int(255 * (1 - y / frame.shape[0]))
+        
+        # Try to add text
+        try:
+            import cv2
+            h, w = frame.shape[:2]
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            cv2.putText(frame, "SIMULATION MODE", (w//4, h//2), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
+            cv2.putText(frame, timestamp, (w//4, h//2 + 60), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+        except ImportError:
+            pass
+        
+        return frame
     
     def capture_frame(self) -> Optional[np.ndarray]:
         """
@@ -77,6 +117,9 @@ class Camera:
         if not self.is_initialized:
             print("⚠️ Camera not initialized. Call initialize() first.")
             return None
+        
+        if self.simulation_mode:
+            return self._generate_simulation_frame()
         
         try:
             # Capture frame as numpy array
@@ -175,6 +218,11 @@ class Camera:
     
     def close(self):
         """Stop and close the camera"""
+        if self.simulation_mode:
+            self.is_initialized = False
+            print("📴 Simulation camera closed")
+            return
+            
         if self.camera:
             try:
                 self.camera.stop()

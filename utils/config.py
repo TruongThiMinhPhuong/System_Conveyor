@@ -21,9 +21,13 @@ class Config:
     MOBILENET_MODEL_PATH = str(MODELS_DIR / "mobilenet_classifier.tflite")
     
     # ======== Camera Settings ========
-    CAMERA_RESOLUTION = (1920, 1080)  # Width x Height
+    CAMERA_RESOLUTION = (640, 480)  # Lower resolution for faster processing
     CAMERA_FRAMERATE = 30
     CAMERA_ROTATION = 0  # 0, 90, 180, or 270
+    
+    # Web streaming settings
+    WEB_STREAM_RESOLUTION = (640, 480)  # Resolution for web streaming
+    JPEG_QUALITY = 70  # JPEG compression quality (1-100)
     
     # Camera adjustments
     CAMERA_BRIGHTNESS = 0.0  # -1.0 to 1.0
@@ -61,9 +65,9 @@ class Config:
     # ======== Timing Settings ========
     
     # Detection and processing
-    DETECTION_INTERVAL = 0.5         # Seconds between detections
-    DETECTION_ZONE_DELAY = 1.0       # Time in detection zone
-    PROCESSING_TIMEOUT = 2.0         # Max time for AI processing
+    DETECTION_INTERVAL = 0.1         # Seconds between detections (faster)
+    DETECTION_ZONE_DELAY = 0.5       # Time in detection zone
+    PROCESSING_TIMEOUT = 1.0         # Max time for AI processing
     
     # Motor control
     SERVO_MOVE_DELAY = 0.5          # Time for servo to move
@@ -101,7 +105,7 @@ class Config:
     VISUAL_DEBUG = False  # Save annotated images for debugging
     
     # Performance
-    MAX_FPS = 10  # Maximum processing FPS
+    MAX_FPS = 25  # Maximum processing FPS (increased)
     SKIP_FRAMES = 0  # Number of frames to skip between processing
     
     # Safety
