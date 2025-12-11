@@ -1,0 +1,24 @@
+# YOLOv8 Fruit Detection Dataset Configuration
+
+# Dataset paths (adjust these paths to your actual dataset)
+path: ./datasets/fruit_detection  # Root directory
+train: images/train  # Train images (relative to 'path')
+val: images/val      # Validation images (relative to 'path')
+test: images/test    # Test images (optional)
+
+# Number of classes
+nc: 3
+
+# Class names
+# Modify this list based on the fruits you want to detect
+names:
+  0: apple
+  1: orange
+  2: banana
+
+# Additional notes:
+# - Each image should have a corresponding .txt label file
+# - Label format: <class_id> <x_center> <y_center> <width> <height>
+# - All coordinates are normalized to [0, 1]
+# - Example label: 0 0.5 0.5 0.3 0.4
+#   (apple at center, 30% width, 40% height)

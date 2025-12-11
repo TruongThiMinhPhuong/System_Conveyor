@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍎 AI Fruit Sorting System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🍎 AI Fruit Sorting System</h1>
+                <p class="subtitle">Raspberry Pi 4 - YOLOv8 + MobileNetV2</p>
+            </div>
+            <div class="status-indicator">
+                <span id="connection-status" class="status-dot offline"></span>
+                <span id="connection-text">Offline</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-layout">
+            <!-- Left Panel: Video Feed -->
+            <div class="panel video-panel">
+                <div class="panel-header">
+                    <h2>📹 Camera Feed</h2>
+                    <span id="fps-indicator" class="badge">0 FPS</span>
+                </div>
+                <div class="video-container">
+                    <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Camera Feed">
+                    <div id="video-overlay" class="video-overlay">
+                        <div class="loading-spinner"></div>
+                        <p>Waiting for feed...</p>
+                    </div>
+                </div>
+                <div class="video-info">
+                    <div id="last-detection" class="detection-info">
+                        <strong>Last Detection:</strong> <span id="detection-text">None</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Controls & Statistics -->
+            <div class="panel control-panel">
+                <!-- System Controls -->
+                <div class="section">
+                    <h2>⚙️ System Control</h2>
+                    <div class="control-buttons">
+                        <button id="btn-start" class="btn btn-primary" onclick="startSystem()">
+                            ▶️ Start System
+                        </button>
+                        <button id="btn-stop" class="btn btn-danger" onclick="stopSystem()">
+                            ⏹️ Stop System
+                        </button>
+                    </div>
+                    <div class="system-status">
+                        <div class="status-item">
+                            <span class="label">System Status:</span>
+                            <span id="system-status" class="value">Stopped</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Uptime:</span>
+                            <span id="uptime" class="value">0s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Motor Controls -->
+                <div class="section">
+                    <h2>🔧 Motor Control</h2>
+                    <div class="control-buttons">
+                        <button class="btn btn-success" onclick="controlMotor('start')">
+                            Start Motor
+                        </button>
+                        <button class="btn btn-warning" onclick="controlMotor('stop')">
+                            Stop Motor
+                        </button>
+                    </div>
+                    <div class="speed-control">
+                        <label for="speed-slider">Speed: <span id="speed-value">60</span>%</label>
+                        <input type="range" id="speed-slider" min="0" max="100" value="60" 
+                               oninput="updateSpeed(this.value)">
+                    </div>
+                </div>
+
+                <!-- Servo Controls -->
+                <div class="section">
+                    <h2>🔄 Servo Control</h2>
+                    <div class="servo-buttons">
+                        <button class="btn btn-secondary" onclick="controlServo('left')">
+                            ⬅️ Left (Fresh)
+                        </button>
+                        <button class="btn btn-secondary" onclick="controlServo('center')">
+                            ↔️ Center
+                        </button>
+                        <button class="btn btn-secondary" onclick="controlServo('right')">
+                            ➡️ Right (Spoiled)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="section">
+                    <h2>📊 Statistics</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-detections">0</div>
+                            <div class="stat-label">Total Detected</div>
+                        </div>
+                        <div class="stat-card fresh">
+                            <div class="stat-value" id="fresh-sorted">0</div>
+                            <div class="stat-label">Fresh Sorted</div>
+                        </div>
+                        <div class="stat-card spoiled">
+                            <div class="stat-value" id="spoiled-sorted">0</div>
+                            <div class="stat-label">Spoiled Sorted</div>
+                        </div>
+                        <div class="stat-card errors">
+                            <div class="stat-value" id="errors">0</div>
+                            <div class="stat-label">Errors</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" onclick="resetStats()">
+                        Reset Statistics
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>AI Fruit Sorting Conveyor System © 2025 | Raspberry Pi 4</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
