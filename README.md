@@ -138,6 +138,6 @@ Chỉnh sửa file `utils/config.py` để tùy chỉnh:
 
 MIT License
 
-## 👨‍💻 Tác Giả
+## 👨‍💻 Minh Phuong
 
 Development of a Conveyor System for Fruit Quality Classification Using AI Camera - 2025
