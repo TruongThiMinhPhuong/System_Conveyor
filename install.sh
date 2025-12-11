@@ -26,6 +26,26 @@ if [ ! -f /proc/device-tree/model ] || ! grep -q "Raspberry Pi" /proc/device-tre
 fi
 
 echo ""
+echo "Step 0: Setting up swap space (4GB)..."
+echo "This is CRITICAL for training AI models on Pi!"
+
+# Check current swap
+current_swap=$(free -m | awk '/Swap:/ {print $2}')
+if [ "$current_swap" -lt 4000 ]; then
+    echo "Current swap is ${current_swap}MB, increasing to 4GB..."
+    
+    sudo dphys-swapfile swapoff
+    sudo sed -i 's/^CONF_SWAPSIZE=.*/CONF_SWAPSIZE=4096/' /etc/dphys-swapfile
+    sudo dphys-swapfile setup
+    sudo dphys-swapfile swapon
+    
+    new_swap=$(free -m | awk '/Swap:/ {print $2}')
+    echo -e "${GREEN}✓ Swap increased to ${new_swap}MB${NC}"
+else
+    echo -e "${GREEN}✓ Swap already configured (${current_swap}MB)${NC}"
+fi
+
+echo ""
 echo "Step 1: Updating system packages..."
 sudo apt-get update
 sudo apt-get upgrade -y
