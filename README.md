@@ -38,23 +38,31 @@ System_Conveyor/
 
 ## 🚀 Cài Đặt
 
-### 1. Cài Đặt Trên Raspberry Pi
+### ⚡ Cài Đặt Nhanh (Khuyến Nghị)
 
 ```bash
-cd System_Conveyor
+cd ~/System_Conveyor
 chmod +x install.sh
 ./install.sh
 ```
 
-### 2. Kích Hoạt Camera và GPIO
+Xem chi tiết: **[QUICK_INSTALL.md](QUICK_INSTALL.md)** ← BẮT ĐẦU TỪ ĐÂY!
 
+### 📖 Cài Đặt Chi Tiết
+
+Xem hướng dẫn từng bước tại: [INSTALLATION_GUIDE.md](docs/INSTALLATION_GUIDE.md)
+
+---
+
+## 🎓 Training Models
+
+### Trên Raspberry Pi 4 (8GB RAM)
 ```bash
-sudo raspi-config
-# Interface Options → Camera → Enable
-# Interface Options → GPIO → Enable
+# Xem hướng dẫn chi tiết
+docs/TRAINING_ON_PI.md
 ```
 
-### 3. Huấn Luyện Models (Trên PC/Laptop)
+### Trên PC/Laptop (GPU)
 
 Xem hướng dẫn chi tiết tại [docs/training_guide.md](docs/training_guide.md)
 
