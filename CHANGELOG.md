@@ -80,9 +80,7 @@ System_Conveyor/
     └── web_interface_guide.md     # Giao diện web
 ```
 
-**Tổng: 14 tài liệu hướng dẫn đầy đủ!** 📚
 
----
 
 ## 🆕 CẬP NHẬT MỚI NHẤT
 

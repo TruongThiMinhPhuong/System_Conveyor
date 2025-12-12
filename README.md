@@ -1,7 +1,6 @@
-# 🍎 AI Fruit Sorting Conveyor System
+# 🍎Development of a Conveyor System for Fruit Quality Classification Using AI Camera
 
-> **🍓 QUAN TRỌNG:** Toàn bộ hệ thống chạy **HOÀN TOÀN trên Raspberry Pi 4 (8GB RAM)**!  
-> Không cần PC/Laptop riêng. Training, deployment, web interface - TẤT CẢ trên Pi!  
+> **🍓 QUAN TRỌNG:** Toàn bộ hệ thống chạy **HOÀN TOÀN trên Raspberry Pi 4 (8GB RAM)**!   
 > Xem chi tiết: **[EVERYTHING_ON_PI4.md](docs/EVERYTHING_ON_PI4.md)** ⚡
 > 
 > 📋 **Updates:** Xem [CHANGELOG.md](CHANGELOG.md) - Version 1.0.0 ✅
@@ -40,7 +39,7 @@ System_Conveyor/
 
 ## 🚀 Cài Đặt
 
-### ⚡ Cài Đặt Nhanh (Khuyến Nghị)
+### ⚡ Cài Đặt Nhanh
 
 ```bash
 cd ~/System_Conveyor
@@ -95,7 +94,7 @@ python export_tflite.py
 python fruit_sorter.py
 ```
 
-### Giao Diện Web (Khuyến Nghị) 🌐
+### Giao Diện Web  🌐
 ```bash
 python run_web.py
 ```
