@@ -1,8 +1,3 @@
-# Hệ Thống Phân Loại Hoa Quả AI - Tổng Hợp Tài Liệu
-
-> **🍓 QUAN TRỌNG:** Hệ thống này có thể chạy **HOÀN TOÀN trên Raspberry Pi 4** (8GB RAM),  
-> **KỂ CẢ TRAINING AI MODELS**! Không cần PC/Laptop riêng.  
-> ⏰ Lưu ý: Training trên Pi sẽ chậm hơn (6-12 giờ so với 1-2 giờ trên GPU).
 
 ## 📚 Index - Danh Mục Tài Liệu
 
@@ -373,4 +368,4 @@ python run_web.py
 
 **Chúc bạn thành công với dự án! 🍎🤖✨**
 
-*Last updated: 2025-12-11*
+

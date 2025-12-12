@@ -1,4 +1,4 @@
-# 🚀 Hướng Dẫn Cài Đặt Chi Tiết - Từng Bước
+
 
 ## 📋 Yêu Cầu Trước Khi Bắt Đầu
 
@@ -644,4 +644,4 @@ deactivate
 
 **Chúc bạn cài đặt thành công! 🎉**
 
-*Mất khoảng 1-2 giờ cho toàn bộ quá trình setup*
+

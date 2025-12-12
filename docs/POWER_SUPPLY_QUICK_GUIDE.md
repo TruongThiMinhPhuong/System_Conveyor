@@ -1,6 +1,6 @@
-# 🔌 Hướng Dẫn Kết Nối Nguồn Điện - Quick Reference
+# 🔌 Hướng Dẫn Kết Nối Nguồn Điện 
 
-## ✅ Giải Pháp Tối Ưu (Khuyến Nghị)
+## ✅ Giải Pháp Tối Ưu 
 
 ### Danh Sách Nguồn Điện Cần Có:
 
@@ -18,7 +18,7 @@
 | Linh Kiện | Thông Số | Số Lượng | Link Tham Khảo |
 |-----------|----------|----------|----------------|
 | **Adapter 12V DC** | 12V 5A (60W) | 1 | Shopee/Lazada |
-| **Buck Converter** | LM2596 hoặc XL4015 | 1 | Module hạ áp 12V→6V |
+| **Buck Converter** | LM2596  | 1 | Module hạ áp 12V→6V |
 | **Terminal Block** | 2-3 cổng xoắn vít | 2-3 | Nối dây GND chung |
 | **Dây Nguồn** | 18-20 AWG | 2-3m | Đỏ (+) và Đen (GND) |
 

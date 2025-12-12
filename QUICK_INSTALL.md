@@ -1,8 +1,4 @@
-# � Hướng Dẫn Cài Đặt Nhanh
-
-## ⚡ 3 BƯỚC ĐƠN GIẢN
-
-### Bước 1: Copy Project Vào Pi
+ Bước 1: Copy Project Vào Pi
 
 **Cách A: Từ USB**
 ```bash
@@ -290,7 +286,5 @@ sudo nano /etc/systemd/system/fruit-sorter.service
 - ✅ **Documentation** - Link đầy đủ mọi tài liệu
 
 ---
-
-**🍓 Hệ thống sẵn sàng trong 1 giờ! Bắt đầu ngay! 🚀**
 
 **Xem chi tiết từng bước:** [docs/INSTALLATION_GUIDE.md](docs/INSTALLATION_GUIDE.md)

@@ -516,3 +516,6 @@ AttributeError: 'Camera' object has no attribute 'simulation_mode'
 [2025-12-11 18:49:48] [WebFruitSorter] [INFO] [logger.py:128] - ⚙️ System stopped
 [2025-12-11 18:54:43] [WebFruitSorter] [INFO] [logger.py:128] - ⚙️ ✅ Web system initialized
 [2025-12-11 18:55:01] [WebFruitSorter] [INFO] [logger.py:128] - ⚙️ System stopped
+[2025-12-11 20:23:28] [WebFruitSorter] [INFO] [logger.py:128] - ⚙️ ✅ Web system initialized
+[2025-12-11 20:53:37] [WebFruitSorter] [INFO] [logger.py:128] - ⚙️ ✅ Web system initialized
+[2025-12-11 21:20:16] [WebFruitSorter] [INFO] [logger.py:128] - ⚙️ ✅ Web system initialized

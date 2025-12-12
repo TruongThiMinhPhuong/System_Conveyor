@@ -1,6 +1,4 @@
-# 🍓 TOÀN BỘ HỆ THỐNG CHẠY TRÊN RASPBERRY PI 4 (8GB RAM)
 
-## ✅ XÁC NHẬN: CHỈ CẦN 1 THIẾT BỊ DUY NHẤT!
 
 ### Raspberry Pi 4 (8GB RAM) CÓ THỂ LÀM TẤT CẢ:
 
@@ -12,11 +10,7 @@
 ✅ **Web Interface** → Giao diện web chạy trên Pi  
 ✅ **Điều khiển phần cứng** → GPIO/Servo/Motor trên Pi  
 
-**KHÔNG CẦN:**
-- ❌ PC/Laptop riêng
-- ❌ Cloud server
-- ❌ GPU card
-- ❌ Thiết bị phụ khác
+
 
 **CHỈ CẦN:**
 - ✅ 1x Raspberry Pi 4 (8GB RAM)
@@ -503,4 +497,4 @@ nano utils/config.py
 
 **🍓 RASPBERRY PI 4 (8GB) = HỆ THỐNG HOÀN CHỈNH! 🤖**
 
-*Không cần thiết bị nào khác!*
+
