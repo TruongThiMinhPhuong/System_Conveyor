@@ -133,29 +133,29 @@ class ServoControl:
             print(f"❌ Servo movement failed: {e}")
             return False
     
-    def move_to_left(self) -> bool:
+    def move_to_fresh(self) -> bool:
         """
-        Move servo to left position (fresh fruit)
+        Move servo to fresh position (0° - straight through)
         
         Returns:
             True if successful
         """
-        print("⬅️ Sorting LEFT (Fresh)")
+        print("✅ Sorting FRESH (Straight - 0°)")
         return self.move_to_angle(
-            gpio_config.SERVO_ANGLE_LEFT,
+            gpio_config.SERVO_ANGLE_FRESH,
             gpio_config.SERVO_MOVE_DELAY
         )
     
-    def move_to_right(self) -> bool:
+    def move_to_spoiled(self) -> bool:
         """
-        Move servo to right position (spoiled fruit)
+        Move servo to spoiled position (180° - push right)
         
         Returns:
             True if successful
         """
-        print("➡️ Sorting RIGHT (Spoiled)")
+        print("❌ Sorting SPOILED (Right - 180°)")
         return self.move_to_angle(
-            gpio_config.SERVO_ANGLE_RIGHT,
+            gpio_config.SERVO_ANGLE_SPOILED,
             gpio_config.SERVO_MOVE_DELAY
         )
     
@@ -183,9 +183,9 @@ class ServoControl:
             True if successful
         """
         if is_fresh:
-            return self.move_to_left()
+            return self.move_to_fresh()
         else:
-            return self.move_to_right()
+            return self.move_to_spoiled()
     
     def test_movement(self):
         """
@@ -198,9 +198,9 @@ class ServoControl:
         
         positions = [
             ("Center", gpio_config.SERVO_ANGLE_CENTER),
-            ("Left", gpio_config.SERVO_ANGLE_LEFT),
+            ("Fresh (0°)", gpio_config.SERVO_ANGLE_FRESH),
             ("Center", gpio_config.SERVO_ANGLE_CENTER),
-            ("Right", gpio_config.SERVO_ANGLE_RIGHT),
+            ("Spoiled (180°)", gpio_config.SERVO_ANGLE_SPOILED),
             ("Center", gpio_config.SERVO_ANGLE_CENTER)
         ]
         

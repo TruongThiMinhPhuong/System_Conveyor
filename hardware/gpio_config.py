@@ -38,15 +38,15 @@ SERVO_CENTER_DUTY = 7.5   # Center position (90 degrees)
 MOTOR_PWM_FREQUENCY = 1000  # 1 kHz for motor speed control
 
 # ============================================
-# Servo Angles for Sorting (3-Way Classification)
+# Servo Angles for Sorting (2-Way Classification)
 # ============================================
-# LEFT = Non-fruit objects (reject bin 1)
-# CENTER = Fresh fruit (good bin - straight path)
-# RIGHT = Spoiled fruit (reject bin 2)
+# FRESH = Fresh fruit (0° - go straight through)
+# SPOILED = Spoiled fruit (180° - push to right reject bin)
+# CENTER = Neutral position (90°)
 
-SERVO_ANGLE_LEFT = 45      # Non-fruit objects → LEFT (reject bin 1)
-SERVO_ANGLE_CENTER = 90    # Fresh fruit → CENTER (good bin - straight)
-SERVO_ANGLE_RIGHT = 135    # Spoiled fruit → RIGHT (reject bin 2)
+SERVO_ANGLE_FRESH = 0        # Fresh fruit → STRAIGHT (0° - no deflection)
+SERVO_ANGLE_SPOILED = 180    # Spoiled fruit → RIGHT (180° - reject bin)
+SERVO_ANGLE_CENTER = 90      # Neutral/default position
 
 # ============================================
 # Motor Speed Settings

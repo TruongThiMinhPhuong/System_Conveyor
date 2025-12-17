@@ -10,16 +10,17 @@ import numpy as np
 
 
 def create_augmentation_pipeline(
-    rotation_range: float = 20.0,
-    width_shift_range: float = 0.2,
-    height_shift_range: float = 0.2,
-    zoom_range: float = 0.2,
+    rotation_range: float = 25.0,
+    width_shift_range: float = 0.25,
+    height_shift_range: float = 0.25,
+    zoom_range: float = 0.25,
     horizontal_flip: bool = True,
-    brightness_range: tuple = (0.8, 1.2),
+    vertical_flip: bool = True,
+    brightness_range: tuple = (0.6, 1.4),
     include_preprocessing: bool = True
 ):
     """
-    Create data augmentation pipeline
+    Create data augmentation pipeline optimized for conveyor belt conditions
     
     Args:
         rotation_range: Rotation angle range (degrees)
@@ -27,7 +28,8 @@ def create_augmentation_pipeline(
         height_shift_range: Vertical shift fraction
         zoom_range: Zoom fraction
         horizontal_flip: Whether to apply horizontal flip
-        brightness_range: Brightness adjustment range
+        vertical_flip: Whether to apply vertical flip
+        brightness_range: Brightness adjustment range (wider for varying lighting)
         include_preprocessing: Include MobileNetV2 preprocessing
         
     Returns:
@@ -35,19 +37,25 @@ def create_augmentation_pipeline(
     """
     augmentation_layers = []
     
-    # Random flip
+    # Random horizontal flip (fruits can appear from either side)
     if horizontal_flip:
         augmentation_layers.append(
             layers.RandomFlip("horizontal")
         )
     
-    # Random rotation
+    # Random vertical flip (fruits can be oriented differently)
+    if vertical_flip:
+        augmentation_layers.append(
+            layers.RandomFlip("vertical")
+        )
+    
+    # Random rotation (fruits roll on conveyor)
     if rotation_range > 0:
         augmentation_layers.append(
             layers.RandomRotation(rotation_range / 360.0)
         )
     
-    # Random zoom
+    # Random zoom (different fruit sizes, varying distances from camera)
     if zoom_range > 0:
         augmentation_layers.append(
             layers.RandomZoom(
@@ -56,16 +64,17 @@ def create_augmentation_pipeline(
             )
         )
     
-    # Random translation
+    # Random translation (fruits move across frame)
     if width_shift_range > 0 or height_shift_range > 0:
         augmentation_layers.append(
             layers.RandomTranslation(
                 height_factor=height_shift_range,
-                width_factor=width_shift_range
+                width_factor=width_shift_range,
+                fill_mode='reflect'
             )
         )
     
-    # Random brightness
+    # Random brightness (varying lighting conditions on conveyor)
     if brightness_range:
         augmentation_layers.append(
             layers.RandomBrightness(
@@ -73,15 +82,16 @@ def create_augmentation_pipeline(
             )
         )
     
-    # Random contrast
+    # Random contrast (different lighting conditions)
     augmentation_layers.append(
-        layers.RandomContrast(factor=0.2)
+        layers.RandomContrast(factor=0.3)
     )
     
-    # MobileNetV2 preprocessing
+    # MobileNetV2 preprocessing - CRITICAL: Must match inference preprocessing
     if include_preprocessing:
+        # Normalize to [-1, 1] range as expected by MobileNetV2
         augmentation_layers.append(
-            layers.Rescaling(1./127.5, offset=-1)  # Normalize to [-1, 1]
+            layers.Rescaling(1./127.5, offset=-1)
         )
     
     return keras.Sequential(augmentation_layers, name="augmentation")

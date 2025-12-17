@@ -77,13 +77,13 @@ class MobileNetClassifier:
     
     def preprocess_image(self, image: np.ndarray) -> np.ndarray:
         """
-        Preprocess image for model input
+        Preprocess image for model input - MobileNetV2 preprocessing
         
         Args:
             image: Input image (already normalized to [0, 1])
             
         Returns:
-            Preprocessed batch ready for model
+            Preprocessed batch ready for model (normalized to [-1, 1])
         """
         # Ensure correct shape
         if len(image.shape) == 3:
@@ -92,6 +92,12 @@ class MobileNetClassifier:
         
         # Ensure float32 type
         image = image.astype(np.float32)
+        
+        # CRITICAL FIX: MobileNetV2 expects input in range [-1, 1]
+        # If image is in [0, 1], convert to [-1, 1]
+        if image.max() <= 1.0:
+            # Convert from [0, 1] to [-1, 1]
+            image = image * 2.0 - 1.0
         
         return image
     

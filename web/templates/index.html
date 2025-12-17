@@ -40,7 +40,31 @@
                 </div>
                 <div class="video-info">
                     <div id="last-detection" class="detection-info">
-                        <strong>Last Detection:</strong> <span id="detection-text">None</span>
+                        <h3 style="margin-top: 0; margin-bottom: 10px;">🎯 Last Detection</h3>
+                        <div id="detection-container" style="display: none;">
+                            <div style="display: flex; gap: 15px; align-items: flex-start;">
+                                <div id="detection-image-container" style="flex-shrink: 0;">
+                                    <img id="detection-image" src="" alt="Detected Fruit"
+                                        style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 3px solid #ddd; cursor: pointer;"
+                                        onclick="enlargeImage(this.src)">
+                                </div>
+                                <div style="flex-grow: 1;">
+                                    <div id="detection-details" style="font-size: 14px; line-height: 1.8;">
+                                        <p style="margin: 5px 0;"><strong>Type:</strong> <span
+                                                id="detection-type">-</span></p>
+                                        <p style="margin: 5px 0;"><strong>Classification:</strong> <span
+                                                id="detection-class">-</span></p>
+                                        <p style="margin: 5px 0;"><strong>Confidence:</strong> <span
+                                                id="detection-confidence">-</span></p>
+                                        <p style="margin: 5px 0;"><strong>Time:</strong> <span
+                                                id="detection-time">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="no-detection" style="color: #888; text-align: center; padding: 20px;">
+                            No detection yet
+                        </div>
                     </div>
                 </div>
             </div>
@@ -92,14 +116,14 @@
                 <div class="section">
                     <h2>🔄 Servo Control</h2>
                     <div class="servo-buttons">
-                        <button class="btn btn-secondary" onclick="controlServo('left')">
-                            ⬅️ Left (Test)
+                        <button class="btn btn-secondary" onclick="controlServo('fresh')">
+                            ✅ Fresh (0° - Straight)
                         </button>
                         <button class="btn btn-secondary" onclick="controlServo('center')">
-                            ↔️ Center (Fresh - Straight)
+                            ↔️ Center (90° - Neutral)
                         </button>
-                        <button class="btn btn-secondary" onclick="controlServo('right')">
-                            ➡️ Right (Spoiled)
+                        <button class="btn btn-secondary" onclick="controlServo('spoiled')">
+                            ❌ Spoiled (180° - Right)
                         </button>
                     </div>
                 </div>
@@ -136,6 +160,17 @@
         <footer class="footer">
             <p>Development of a Conveyor System for Fruit Quality Classification Using AI Camera © 2025 </p>
         </footer>
+    </div>
+
+    <!-- Image Enlargement Modal -->
+    <div id="image-modal"
+        style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); cursor: pointer;"
+        onclick="closeImageModal()">
+        <img id="modal-image" src=""
+            style="margin: auto; display: block; max-width: 90%; max-height: 90%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <span
+            style="position: absolute; top: 20px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer;"
+            onclick="closeImageModal()">&times;</span>
     </div>
 
     <!-- Toast Notifications -->

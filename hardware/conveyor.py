@@ -100,29 +100,25 @@ class ConveyorSystem:
         pause_conveyor: bool = True
     ):
         """
-        Execute sorting action based on object type
+        Execute sorting action based on classification result
         
         Args:
-            is_fresh: True if fresh, False if spoiled (ignored if not fruit)
-            is_fruit: Whether the detected object is a fruit
+            is_fresh: True if fresh, False if spoiled
+            is_fruit: Whether the detected object is a fruit (legacy parameter)
             pause_conveyor: Whether to pause conveyor during sorting
         """
         if pause_conveyor:
             self.pause_for_sorting()
         
-        # Move servo based on object type
-        if not is_fruit:
-            # Non-fruit object → Turn LEFT (reject bin 1)
-            print("⚠️ Non-fruit object → LEFT")
-            self.servo.move_to_left()
-        elif is_fresh:
-            # Fresh fruit → Go STRAIGHT (center - good bin)
-            print("🍎 Fresh fruit → STRAIGHT")
-            self.servo.move_to_center()
+        # Move servo based on classification
+        if is_fresh:
+            # Fresh fruit → Go STRAIGHT (0° - no deflection)
+            print("🍎 Fresh fruit → STRAIGHT (0°)")
+            self.servo.move_to_fresh()
         else:
-            # Spoiled fruit → Turn RIGHT (reject bin 2)
-            print("🍂 Spoiled fruit → RIGHT")
-            self.servo.move_to_right()
+            # Spoiled fruit → Push RIGHT (180° - reject bin)
+            print("🍂 Spoiled fruit → RIGHT (180°)")
+            self.servo.move_to_spoiled()
         
         # Wait for mechanical action to complete
         time.sleep(gpio_config.SERVO_MOVE_DELAY)

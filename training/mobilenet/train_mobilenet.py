@@ -19,16 +19,16 @@ def create_mobilenet_model(
     input_shape: tuple = (224, 224, 3),
     num_classes: int = 2,
     freeze_base: bool = True,
-    dropout_rate: float = 0.3
+    dropout_rate: float = 0.5
 ):
     """
-    Create MobileNetV2 transfer learning model
+    Create MobileNetV2 transfer learning model with improved regularization
     
     Args:
         input_shape: Input image shape
         num_classes: Number of output classes
         freeze_base: Whether to freeze base model weights
-        dropout_rate: Dropout rate
+        dropout_rate: Dropout rate (increased for better generalization)
         
     Returns:
         Keras model
@@ -52,10 +52,21 @@ def create_mobilenet_model(
     # Global average pooling
     x = layers.GlobalAveragePooling2D()(x)
     
-    # Dense layers
-    x = layers.Dense(256, activation='relu')(x)
+    # Dense layers with L2 regularization
+    x = layers.Dense(
+        256, 
+        activation='relu',
+        kernel_regularizer=keras.regularizers.l2(0.01)
+    )(x)
+    x = layers.BatchNormalization()(x)
     x = layers.Dropout(dropout_rate)(x)
-    x = layers.Dense(128, activation='relu')(x)
+    
+    x = layers.Dense(
+        128, 
+        activation='relu',
+        kernel_regularizer=keras.regularizers.l2(0.01)
+    )(x)
+    x = layers.BatchNormalization()(x)
     x = layers.Dropout(dropout_rate)(x)
     
     # Output layer
@@ -116,13 +127,32 @@ def train_mobilenet(
     
     print("✅ Datasets loaded")
     
+    # Calculate class weights to handle potential class imbalance
+    print(f"\n⚖️ Calculating class weights...")
+    
+    # Count samples per class
+    fresh_count = len(list(Path(f"{dataset_dir}/train/fresh").glob("*.[jp][pn][g]*")))
+    spoiled_count = len(list(Path(f"{dataset_dir}/train/spoiled").glob("*.[jp][pn][g]*")))
+    total_count = fresh_count + spoiled_count
+    
+    print(f"   Fresh: {fresh_count} samples")
+    print(f"   Spoiled: {spoiled_count} samples")
+    
+    # Calculate weights (inverse frequency)
+    weight_fresh = total_count / (2 * fresh_count) if fresh_count > 0 else 1.0
+    weight_spoiled = total_count / (2 * spoiled_count) if spoiled_count > 0 else 1.0
+    
+    class_weights = {0: weight_fresh, 1: weight_spoiled}
+    
+    print(f"   Class weights: Fresh={weight_fresh:.3f}, Spoiled={weight_spoiled:.3f}")
+    
     # Create model
     print(f"\n🏗️ Building MobileNetV2 model...")
     model = create_mobilenet_model(
         input_shape=(image_size, image_size, 3),
         num_classes=2,
         freeze_base=True,
-        dropout_rate=0.3
+        dropout_rate=0.5  # Increased for better generalization
     )
     
     # Compile model
@@ -145,7 +175,7 @@ def train_mobilenet(
         ),
         EarlyStopping(
             monitor='val_loss',
-            patience=10,
+            patience=15,  # Increased patience
             restore_best_weights=True,
             verbose=1
         ),
@@ -155,6 +185,12 @@ def train_mobilenet(
             patience=5,
             min_lr=1e-7,
             verbose=1
+        ),
+        keras.callbacks.TensorBoard(
+            log_dir=str(output_path / 'logs'),
+            histogram_freq=1,
+            write_graph=True,
+            update_freq='epoch'
         )
     ]
     
@@ -163,6 +199,7 @@ def train_mobilenet(
     print(f"   Epochs: {epochs}")
     print(f"   Batch size: {batch_size}")
     print(f"   Learning rate: {learning_rate}")
+    print(f"   Using class weights: {class_weights}")
     print("-" * 60)
     
     history = model.fit(
@@ -170,6 +207,7 @@ def train_mobilenet(
         validation_data=val_dataset,
         epochs=epochs,
         callbacks=callbacks,
+        class_weight=class_weights,  # Handle class imbalance
         verbose=1
     )
     
@@ -192,6 +230,12 @@ def train_mobilenet(
     print(f"   Accuracy: {results[1]:.2%}")
     print(f"   Precision: {results[2]:.2%}")
     print(f"   Recall: {results[3]:.2%}")
+    
+    # Calculate F1 score
+    precision = results[2]
+    recall = results[3]
+    f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    print(f"   F1 Score: {f1_score:.2%}")
     
     print(f"\n🎉 Training complete!")
     print(f"📦 Next step: Convert to TensorFlow Lite")

@@ -42,7 +42,8 @@ stats = {
     'errors': 0,
     'uptime': 0,
     'fps': 0,
-    'last_detection': None
+    'last_detection': None,
+    'last_detection_image': None  # NEW: Store last detection image
 }
 
 
@@ -137,6 +138,14 @@ class WebFruitSorter:
                     # Update last detection
                     stats['last_detection']['classification'] = classification['predicted_class']
                     stats['last_detection']['class_confidence'] = classification['confidence']
+                    
+                    # Capture detection image (ROI)
+                    x1, y1, x2, y2 = bbox
+                    roi = frame[y1:y2, x1:x2].copy()
+                    # Encode to base64 for web transfer
+                    ret, jpeg = cv2.imencode('.jpg', roi, [cv2.IMWRITE_JPEG_QUALITY, 85])
+                    if ret:
+                        stats['last_detection_image'] = base64.b64encode(jpeg).decode('utf-8')
                     
                     # Sort fruit
                     self.conveyor.sort_fruit(is_fresh, pause_conveyor=False)
@@ -334,10 +343,10 @@ def control_servo(action):
         return jsonify({'success': False, 'message': 'System not initialized'})
     
     try:
-        if action == 'left':
-            system_instance.conveyor.servo.move_to_left()
-        elif action == 'right':
-            system_instance.conveyor.servo.move_to_right()
+        if action == 'fresh':
+            system_instance.conveyor.servo.move_to_fresh()
+        elif action == 'spoiled':
+            system_instance.conveyor.servo.move_to_spoiled()
         elif action == 'center':
             system_instance.conveyor.servo.move_to_center()
         else:
@@ -360,7 +369,8 @@ def reset_stats():
         'errors': 0,
         'uptime': 0,
         'fps': 0,
-        'last_detection': None
+        'last_detection': None,
+        'last_detection_image': None
     }
     
     return jsonify({'success': True, 'message': 'Statistics reset'})

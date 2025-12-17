@@ -51,28 +51,35 @@ class Config:
     
     # ======== Hardware Settings ========
     
-    # Conveyor motor speeds (0-100%)
-    CONVEYOR_SPEED_DEFAULT = 60
-    CONVEYOR_SPEED_FAST = 80
-    CONVEYOR_SPEED_SLOW = 30
-    CONVEYOR_SPEED_DETECTION = 40  # Speed during detection zone
+    # Conveyor motor speeds (0-100%) - Optimized for 20cm distance
+    CONVEYOR_SPEED_DEFAULT = 35       # Slower for 20cm distance precision
+    CONVEYOR_SPEED_FAST = 60          # Fast mode (no detection)
+    CONVEYOR_SPEED_SLOW = 20          # Very slow for calibration
+    CONVEYOR_SPEED_DETECTION = 35     # Speed during detection (2.92 cm/s)
     
     # Servo angles (0-180 degrees)
-    SERVO_ANGLE_LEFT = 45    # Fresh fruit
-    SERVO_ANGLE_CENTER = 90  # Neutral
-    SERVO_ANGLE_RIGHT = 135  # Spoiled fruit
+    SERVO_ANGLE_FRESH = 0      # Fresh fruit - Go straight (0°)
+    SERVO_ANGLE_SPOILED = 180  # Spoiled fruit - Push right (180°)
+    SERVO_ANGLE_CENTER = 90    # Neutral/default position
     
     # ======== Timing Settings ========
     
-    # Detection and processing
-    DETECTION_INTERVAL = 0.1         # Seconds between detections (faster)
-    DETECTION_ZONE_DELAY = 0.5       # Time in detection zone
-    PROCESSING_TIMEOUT = 1.0         # Max time for AI processing
+    # Camera to Servo Distance (measured in cm)
+    CAMERA_TO_SERVO_DISTANCE = 20.0  # Distance from camera to servo gate
     
-    # Motor control
-    SERVO_MOVE_DELAY = 0.5          # Time for servo to move
-    CONVEYOR_STOP_DELAY = 0.3       # Pause time for sorting
-    CONVEYOR_RESUME_DELAY = 0.2     # Delay before resume
+    # Detection and processing
+    DETECTION_INTERVAL = 0.1         # Seconds between detections
+    DETECTION_ZONE_DELAY = 0.5       # Time in detection zone
+    PROCESSING_TIMEOUT = 1.5         # Max time for AI processing (increased)
+    
+    # Motor control timing - Optimized for 20cm distance
+    SERVO_MOVE_DELAY = 0.6          # Time for servo to move (increased)
+    CONVEYOR_STOP_DELAY = 0.4       # Pause time for sorting (increased)
+    CONVEYOR_RESUME_DELAY = 0.3     # Delay before resume (increased)
+    
+    # Calculated travel time for 20cm at 35% speed (2.92 cm/s)
+    # Travel time = 20cm / 2.92cm/s = 6.85 seconds
+    FRUIT_TRAVEL_TIME = 6.85        # Time for fruit to travel from camera to servo
     
     # ======== Image Preprocessing ========
     
@@ -163,7 +170,7 @@ class Config:
         
         print(f"\n⚙️ Hardware:")
         print(f"   Conveyor speed: {cls.CONVEYOR_SPEED_DEFAULT}%")
-        print(f"   Servo angles: {cls.SERVO_ANGLE_LEFT}° / {cls.SERVO_ANGLE_CENTER}° / {cls.SERVO_ANGLE_RIGHT}°")
+        print(f"   Servo angles: Fresh={cls.SERVO_ANGLE_FRESH}° / Center={cls.SERVO_ANGLE_CENTER}° / Spoiled={cls.SERVO_ANGLE_SPOILED}°")
         
         print(f"\n📊 Operation:")
         print(f"   Auto start: {cls.AUTO_START}")

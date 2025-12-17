@@ -201,17 +201,47 @@ function updateStatistics(stats) {
     document.getElementById('fps-indicator').textContent = `${stats.fps || 0} FPS`;
     document.getElementById('uptime').textContent = formatUptime(stats.uptime || 0);
 
-    // Update last detection
-    if (stats.last_detection) {
+    // Update last detection with image
+    if (stats.last_detection && stats.last_detection_image) {
         const det = stats.last_detection;
-        let detectionText = `${det.class} (${(det.confidence * 100).toFixed(1)}%)`;
 
+        // Show detection container, hide no-detection message
+        document.getElementById('detection-container').style.display = 'block';
+        document.getElementById('no-detection').style.display = 'none';
+
+        // Set detection image
+        const imgElement = document.getElementById('detection-image');
+        imgElement.src = 'data:image/jpeg;base64,' + stats.last_detection_image;
+
+        // Color-code based on classification (fresh = green, spoiled = red)
         if (det.classification) {
-            detectionText += ` → ${det.classification} (${(det.class_confidence * 100).toFixed(1)}%)`;
+            const isFresh = det.classification.toLowerCase().includes('fresh');
+            imgElement.style.borderColor = isFresh ? '#4CAF50' : '#f44336';
+            imgElement.style.boxShadow = isFresh ? '0 0 10px rgba(76, 175, 80, 0.5)' : '0 0 10px rgba(244, 67, 54, 0.5)';
         }
 
-        detectionText += ` at ${det.time}`;
-        document.getElementById('detection-text').textContent = detectionText;
+        // Update detection details
+        document.getElementById('detection-type').textContent = det.class || '-';
+
+        if (det.classification) {
+            const classSpan = document.getElementById('detection-class');
+            classSpan.textContent = det.classification;
+            const isFresh = det.classification.toLowerCase().includes('fresh');
+            classSpan.style.color = isFresh ? '#4CAF50' : '#f44336';
+            classSpan.style.fontWeight = 'bold';
+
+            document.getElementById('detection-confidence').textContent =
+                `${(det.class_confidence * 100).toFixed(1)}%`;
+        } else {
+            document.getElementById('detection-class').textContent = 'Pending...';
+            document.getElementById('detection-confidence').textContent = '-';
+        }
+
+        document.getElementById('detection-time').textContent = det.time || '-';
+    } else if (stats.last_detection) {
+        // Detection exists but no image yet (shouldn't happen, but fallback)
+        document.getElementById('detection-container').style.display = 'none';
+        document.getElementById('no-detection').style.display = 'block';
     }
 }
 
@@ -291,6 +321,25 @@ function showToast(message, type = 'info') {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
+// Image enlargement modal
+function enlargeImage(src) {
+    const modal = document.getElementById('image-modal');
+    const modalImg = document.getElementById('modal-image');
+    modal.style.display = 'block';
+    modalImg.src = src;
+}
+
+function closeImageModal() {
+    document.getElementById('image-modal').style.display = 'none';
+}
+
+// Close modal on ESC key
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        closeImageModal();
+    }
+});
 
 // Request stats every 2 seconds
 setInterval(() => {
