@@ -11,8 +11,8 @@ if __name__ == '__main__':
     print("🌐 AI Fruit Sorting System - Web Interface")
     print("=" * 60)
     print(f"\n🔗 Access the interface at:")
-    print(f"   Local: http://localhost:5000")
-    print(f"   Network: http://<raspberry-pi-ip>:5000")
+    print(f"   🌐 Access: http://192.168.137.177:5000")
+    print(f"   📱 Mobile: http://192.168.137.177:5000")
     print(f"\n📝 Press Ctrl+C to stop the server\n")
     
     # Run with SocketIO

@@ -130,7 +130,7 @@ python hardware/camera.py
 python run_web.py
 ```
 
-**Truy cập**: http://raspberrypi.local:5000
+**Truy cập**: http://192.168.137.177:5000
 
 ---
 
@@ -178,8 +178,8 @@ python run_web.py
 ```
 
 **Truy cập:**
-- Local: http://localhost:5000
-- Từ máy khác: http://\<raspberry-pi-ip\>:5000
+- Raspberry Pi: http://192.168.137.177:5000
+- Từ mạng local: http://192.168.137.177:5000
 
 **Tính Năng Web:**
 - 📹 Video Feed: Live camera với bounding boxes & phân loại
