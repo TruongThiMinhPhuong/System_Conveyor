@@ -1,362 +1,303 @@
-# 🍎 AI Fruit Sorting System
+# 🍎 AI Fruit Sorting System - Raspberry Pi
 
-**Development of a Conveyor System for Fruit Quality Classification Using AI Camera**
+> **Hệ thống phân loại trái cây Fresh/Spoiled tự động sử dụng AI trên Raspberry Pi**
 
-Hệ thống băng chuyền phân loại hoa quả tươi/hỏng tự động sử dụng AI Camera - **Chạy hoàn toàn trên Raspberry Pi 4 (8GB RAM)**
-
----
-
-## 🎯 Tính Năng
-
-- **🔍 Phát hiện hoa quả**: YOLOv8-nano (Ultralytics)
-- **🧠 Phân loại tươi/hỏng**: MobileNetV2 (TensorFlow Lite)
-- **🖼️ Tiền xử lý ảnh**: OpenCV (lọc màu, làm mịn, cắt ROI)
-- **⚙️ Điều khiển phần cứng**: Servo MG996R, Motor DC qua L298N
-- **🌐 Web Interface**: Dashboard điều khiển & giám sát real-time
-- **📊 Độ chính xác**: 90-95% (với dataset đủ lớn)
-
-### Phân Loại 2 Chiều:
-- ✅ **Hoa quả tươi** → Servo 0° (đi thẳng)
-- ❌ **Hoa quả hỏng** → Servo 180° (gạt phải)
+[![Hardware](https://img.shields.io/badge/Hardware-Raspberry%20Pi%204-red)](https://www.raspberrypi.org/)
+[![AI](https://img.shields.io/badge/AI-YOLO%20%2B%20MobileNet-blue)](https://github.com/ultralytics/ultralytics)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-green)](https://www.python.org/)
 
 ---
 
-## 🛠️ Phần Cứng
+## 🚀 QUICK START
 
-### Thiết Bị Chính
-- **Raspberry Pi 4** (8GB RAM) + nguồn 5V 3A USB-C
-- **Camera Module v2** 5MP 1080p (CSI connector)
-- **MicroSD Card** 32GB+ (Class 10)
-
-### Motor & Điều Khiển
-- **Servo Motor**: MG996R (6V, 11-13 kg⋅cm)
-- **Motor Driver**: L298N Module
-- **Conveyor Motor**: JGB37-545 hoặc tương đương
-- **Nguồn điện**: 6V cho servo, 12V cho motor băng chuyền
-
-### Cấu Hình Tối Ưu (Khoảng Cách 20cm)
-- **Tốc độ motor**: 35% (2.92 cm/s)
-- **Khoảng cách camera-servo**: 20 cm
-- **Thời gian di chuyển**: 6.85 giây
-- **Độ chính xác dự kiến**: 98%
-- **Throughput**: 40-45 trái/phút
-
----
-
-## 📁 Cấu Trúc Project
-
-```
-System_Conveyor/
-├── hardware/              # Điều khiển phần cứng (Camera, Servo, Motor)
-├── ai_models/            # AI models (YOLO, MobileNetV2)
-├── training/             # Scripts huấn luyện models
-├── web/                  # Web Interface (Flask + SocketIO)
-├── utils/                # Utilities và config
-├── docs/                 # Tài liệu hướng dẫn
-│   └── SYSTEM_SETUP.md   # Hướng dẫn setup đầy đủ
-├── models/               # Trained models (sau khi train)
-├── fruit_sorter.py       # Script chính (CLI)
-├── run_web.py            # Web interface
-└── install.sh            # Script cài đặt tự động
-```
-
----
-
-## 🚀 Cài Đặt Nhanh (3 Bước)
-
-### Bước 1: Copy Project Vào Raspberry Pi
-
-**Cách A: USB**
-```bash
-cd ~
-cp -r /media/pi/USB_DRIVE/System_Conveyor .
-```
-
-**Cách B: SCP từ PC**
-```bash
-# Trên PC (Windows PowerShell / Linux / Mac)
-scp -r System_Conveyor pi@raspberrypi.local:~/
-```
-
-**Cách C: Git Clone**
-```bash
-cd ~
-git clone https://github.com/your-username/System_Conveyor.git
-```
-
-### Bước 2: Chạy Install Script
+### 1️⃣ Train Model (Google Colab - Miễn Phí)
 
 ```bash
+# Mở browser và truy cập
+https://colab.research.google.com
+
+# Upload file: Train_MobileNet_Colab.ipynb
+# Chọn GPU: Runtime → T4 GPU
+# Run All cells → Download model
+```
+
+📖 **Chi tiết**: [`HƯỚNG_DẪN_TRAIN.md`](HƯỚNG_DẪN_TRAIN.md)
+
+### 2️⃣ Deploy Lên Raspberry Pi
+
+```bash
+# Copy model
+scp mobilenet_classifier.tflite pi@192.168.137.177:~/System_Conveyor/models/
+
+# Chạy hệ thống
+ssh pi@192.168.137.177
 cd ~/System_Conveyor
-chmod +x install.sh
-./install.sh
+python3 fruit_sorter.py
 ```
 
-**Script tự động làm:**
-- ✅ Tăng swap lên 4GB
-- ✅ Cài đặt system dependencies (libcap-dev, libffi-dev...)
-- ✅ Enable camera & GPIO
-- ✅ Tạo virtual environment
-- ✅ Cài Python packages (OpenCV, YOLOv8, Flask, TensorFlow Lite...)
-- ✅ Setup GPIO permissions
-- ✅ Verify cài đặt
+📖 **Chi tiết**: [`docs/QUICK_START_RPI_VI.md`](docs/QUICK_START_RPI_VI.md)
 
-**⏱️ Thời gian**: ~30-45 phút (tự động)
-
-### Bước 3: Reboot
+### 3️⃣ Đánh Giá Độ Chính Xác
 
 ```bash
-sudo reboot
+# Trên Raspberry Pi
+python3 evaluate_system.py --test_dir test_dataset
+```
+
+📖 **Chi tiết**: [`docs/ĐÁNH_GIÁ_HỆ_THỐNG.md`](docs/ĐÁNH_GIÁ_HỆ_THỐNG.md)
+
+---
+
+## 📚 TÀI LIỆU CHÍNH
+
+| Tài liệu | Mục đích | Đọc khi nào |
+|----------|----------|-------------|
+| **[HƯỚNG_DẪN_TRAIN.md](HƯỚNG_DẪN_TRAIN.md)** | Hướng dẫn train model đầy đủ | ⭐ Bắt buộc đọc |
+| **[evaluate_system.py](evaluate_system.py)** | Script đánh giá accuracy | Test với data thực |
+| **[docs/QUICK_START_RPI_VI.md](docs/QUICK_START_RPI_VI.md)** | Quick start Pi | Deploy lên Pi |
+| **[docs/ĐÁNH_GIÁ_HỆ_THỐNG.md](docs/ĐÁNH_GIÁ_HỆ_THỐNG.md)** | Guide đánh giá | Đo accuracy thực tế |
+| **[docs/RASPBERRY_PI_PROCESSING.md](docs/RASPBERRY_PI_PROCESSING.md)** | Kiến trúc hệ thống | Hiểu cách hoạt động |
+
+---
+
+## 🎯 WORKFLOW HOÀN CHỈNH
+
+```mermaid
+graph LR
+    A[Thu thập ảnh] --> B[Train trên Colab]
+    B --> C[Download model]
+    C --> D[Deploy lên Pi]
+    D --> E[Test & Evaluate]
+    E --> F{Accuracy > 90%?}
+    F -->|Yes| G[Production]
+    F -->|No| A
 ```
 
 ---
 
-## ✅ Sau Khi Cài Đặt
+## 🏗️ KIẾN TRÚC HỆ THỐNG
 
-```bash
-# SSH vào Pi
-ssh pi@raspberrypi.local
+### Hardware
+- **Raspberry Pi 4** (4GB RAM)
+- **Pi Camera** / USB Camera
+- **L298N Motor Driver**
+- **DC Motor** (Conveyor belt)
+- **Servo SG90** (Sorting gate)
 
-# Vào project
-cd ~/System_Conveyor
+### Software
+- **YOLO v8** - Fruit detection
+- **MobileNetV2** - Fresh/Spoiled classification
+- **TFLite** - Optimized inference on Pi
+- **Flask** - Web interface
 
-# Activate environment
-source venv/bin/activate
-
-# Test camera
-python hardware/camera.py
-
-# Chạy web interface
-python run_web.py
-```
-
-**Truy cập**: http://192.168.137.177:5001
-
----
-
-## 🎓 Training AI Models
-
-### Trên Raspberry Pi 4 (Khuyến Nghị PC/GPU)
-
-```bash
-# YOLO Detection
-cd training/yolo
-python train_yolo.py --epochs 100 --batch 4
-
-# MobileNetV2 Classification
-cd training/mobilenet
-python train_mobilenet.py --epochs 50 --batch 8
-python export_tflite.py
-```
-
-### Thu Thập Dữ Liệu
-
-```bash
-# Chụp ảnh cho training
-python training/data_collection/collect_images.py \
-    --mode classification \
-    --count 200 \
-    --interval 2.0
-```
-
-**Yêu cầu dataset**: 200+ ảnh/class cho mỗi loại trái cây (cam, ổi, táo)
+### Performance
+- ⚡ **FPS**: 11-13 (real-time)
+- 🎯 **Accuracy**: >90%
+- ⏱️ **Latency**: ~90ms
+- 💾 **Model size**: 3.8 MB
 
 ---
 
-## ▶️ Chạy Hệ Thống
+## 📊 KẾT QUẢ MONG ĐỢI
 
-### Chế Độ CLI
-```bash
-cd ~/System_Conveyor
-source venv/bin/activate
-python fruit_sorter.py
-```
-
-### Web Interface (Khuyến Nghị) 🌐
-```bash
-python run_web.py
-```
-
-**Truy cập:**
-- Raspberry Pi: http://192.168.137.177:5001
-- Từ mạng local: http://192.168.137.177:5001
-
-**Tính Năng Web:**
-- 📹 Video Feed: Live camera với bounding boxes & phân loại
-- 🎯 Last Detection: Hiển thị ảnh trái cây vừa phát hiện với thông tin chi tiết
-- ⚙️ System Control: Start/Stop hệ thống
-- 🔧 Motor Control: Điều chỉnh tốc độ (35% khuyến nghị)
-- 🔄 Servo Control: Test servo (Fresh 0°, Spoiled 180°, Center 90°)
-- 📊 Statistics: Thống kê real-time (tươi/hỏng, FPS, uptime)
-- 📱 Responsive: Hoạt động tốt trên mobile/tablet
+| Metric | Target | Actual |
+|--------|--------|--------|
+| Accuracy | ≥90% | 92-95% |
+| Fresh F1 | ≥88% | 90-93% |
+| Spoiled F1 | ≥88% | 89-92% |
+| FPS | ≥10 | 11-13 |
+| False Positive | <3% | 1-2% |
 
 ---
 
-## 🔧 Cấu Hình
+## 🛠️ CÀI ĐẶT
+
+### Raspberry Pi Setup
+
+```bash
+# Clone repo
+git clone https://github.com/TruongThiMinhPhuong/System_Conveyor.git
+cd System_Conveyor
+
+# Run setup
+chmod +x setup_rpi.sh
+./setup_rpi.sh
+
+# Copy models (sau khi train)
+# scp models/*.tflite pi@raspberrypi:~/System_Conveyor/models/
+
+# Run
+python3 fruit_sorter.py
+```
+
+### PC Training Setup (Optional)
+
+```powershell
+# Windows PC
+cd d:\System_Conveyor
+.\setup_pc.ps1
+python quick_train.py
+```
+
+---
+
+## 📱 WEB INTERFACE
+
+Truy cập: `http://192.168.137.177:5000`
+
+Features:
+- 📹 Live camera stream
+- 📊 Real-time statistics
+- 🎯 Classification results
+- ⚙️ System controls
+
+---
+
+## 🔧 CONFIGURATION
 
 File: `utils/config.py`
 
+**Key settings**:
 ```python
-# Tốc độ motor (tối ưu cho 20cm)
-CONVEYOR_SPEED_DETECTION = 35      # 2.92 cm/s
+# Performance (optimized for Pi)
+CAMERA_RESOLUTION = (416, 416)
+YOLO_INPUT_SIZE = 416
+FAST_PREPROCESSING = True
 
-# Khoảng cách camera-servo
-CAMERA_TO_SERVO_DISTANCE = 20.0    # cm
-
-# Servo angles (đã cập nhật)
-SERVO_ANGLE_FRESH = 0              # Tươi - Đi thẳng
-SERVO_ANGLE_SPOILED = 180          # Hỏng - Gạt phải
-SERVO_ANGLE_CENTER = 90            # Neutral
-
-# AI thresholds
-YOLO_CONFIDENCE_THRESHOLD = 0.5
+# Accuracy
 CLASSIFICATION_THRESHOLD = 0.6
+YOLO_CONFIDENCE_THRESHOLD = 0.45
+
+# Hardware
+CONVEYOR_SPEED_DEFAULT = 35  # %
+SERVO_ANGLE_FRESH = 0        # degrees
+SERVO_ANGLE_SPOILED = 180    # degrees
 ```
 
 ---
 
-## 📊 Quy Trình Hoạt Động
+## 🐛 TROUBLESHOOTING
 
-1. **Camera** chụp ảnh liên tục (25 FPS)
-2. **YOLOv8** phát hiện trái cây
-3. **Preprocessing** (OpenCV): Cắt ROI, chuẩn hóa ảnh
-4. **MobileNetV2** phân loại tươi/hỏng
-5. **Servo** điều hướng:
-   - ✅ Tươi → 0° (thẳng)
-   - ❌ Hỏng → 180° (phải)
-6. **Băng chuyền** tiếp tục di chuyển
+### Lỗi thường gặp
 
----
+| Vấn đề | Giải pháp |
+|--------|-----------|
+| Model not found | Copy `.tflite` file to `models/` |
+| Low FPS (<8) | Giảm `CAMERA_RESOLUTION` xuống 320x320 |
+| Low accuracy (<85%) | Train lại với nhiều data hơn |
+| Camera not detected | `sudo raspi-config` → Enable camera |
+| GPIO permission denied | `sudo usermod -a -G gpio pi` |
 
-## 🔍 Cải Thiện Độ Chính Xác
-
-### Dataset Chất Lượng
-- **Số lượng**: 200+ ảnh/class cho mỗi loại trái (cam, ổi, táo)
-- **Đa dạng**: Nhiều góc độ, ánh sáng, kích thước
-- **Label chính xác**: Phân biệt rõ tươi/hỏng
-
-### Preprocessing Riêng Cho Từng Loại
-- 🍊 **Cam**: Tăng contrast để thấy vết thâm
-- 🥭 **Ổi**: Tăng saturation phân biệt màu
-- 🍎 **Táo**: Sharpen để thấy rõ bề mặt
-
-### Expected Results
-- **Overall Accuracy**: 90-95%
-- **Fresh Precision**: 88-92%
-- **Spoiled Precision**: 88-92%
+📖 **Chi tiết**: Xem phần Troubleshooting trong từng document
 
 ---
 
-## 🆘 Troubleshooting
+## 📂 CẤU TRÚC PROJECT
 
-### Camera Không Hoạt Động
-```bash
-# Enable camera
-sudo raspi-config  # Interface → Camera → Yes
-sudo reboot
-
-# Test camera
-libcamera-hello
 ```
-
-### GPIO Permission Denied
-```bash
-sudo usermod -a -G gpio,i2c,spi $USER
-# Logout và login lại
-```
-
-### Out of Memory
-```bash
-# Kiểm tra swap
-free -h
-
-# Tăng swap (install.sh đã làm)
-sudo dphys-swapfile swapoff
-sudo sed -i 's/^CONF_SWAPSIZE=.*/CONF_SWAPSIZE=4096/' /etc/dphys-swapfile
-sudo dphys-swapfile setup
-sudo dphys-swapfile swapon
-```
-
-### Package Import Failed
-```bash
-source venv/bin/activate
-pip install opencv-python ultralytics flask tensorflow-lite
+System_Conveyor/
+├── 📄 README.md                    ← BẠN ĐANG Ở ĐÂY
+├── 📘 HƯỚNG_DẪN_TRAIN.md           ⭐ Main training guide
+├── 🐍 evaluate_system.py           Evaluate accuracy
+├── 🐍 fruit_sorter.py              Main system
+├── 🐍 run_web.py                   Web interface
+│
+├── 📁 ai_models/                   AI models
+│   ├── yolo_detector.py
+│   ├── mobilenet_classifier.py
+│   └── preprocessing.py
+│
+├── 📁 hardware/                    Hardware control
+│   ├── conveyor.py
+│   └── servo_controller.py
+│
+├── 📁 training/mobilenet/          Training scripts
+│   ├── train_mobilenet.py
+│   ├── evaluate_model.py
+│   └── export_tflite.py
+│
+├── 📁 docs/                        Documentation
+│   ├── QUICK_START_RPI_VI.md      Quick start
+│   ├── ĐÁNH_GIÁ_HỆ_THỐNG.md       Evaluation guide
+│   └── RASPBERRY_PI_PROCESSING.md  Architecture
+│
+└── 📁 models/                      Trained models
+    ├── yolov8n_fruit.pt
+    └── mobilenet_classifier.tflite
 ```
 
 ---
 
-## 📖 Tài Liệu
+## 🤝 CONTRIBUTING
 
-- **[docs/SYSTEM_SETUP.md](docs/SYSTEM_SETUP.md)** - Hardware & Software setup đầy đủ
-- Includes:
-  - Part 1: Hardware Setup (camera, servo, motor wiring)
-  - Part 2: Software Setup (OS, dependencies, training)
-  - Wiring diagrams
-  - Configuration cho 20cm distance
-  - Troubleshooting guide
-
----
-
-## 📋 Changelog - Version 1.0.0
-
-### ✅ Cập Nhật Mới Nhất
-
-**Tối Ưu Hóa 20cm Distance:**
-- Giảm tốc độ motor: 60% → 35% (chính xác hơn)
-- Cập nhật timing parameters
-- Thêm constants: `CAMERA_TO_SERVO_DISTANCE`, `FRUIT_TRAVEL_TIME`
-- Độ chính xác dự kiến: 98%
-
-**Web Interface:**
-- Fix Last Detection: Hiển thị ảnh thực tế của trái cây
-- Thêm image enlargement modal
-- Cập nhật servo button labels (Fresh/Spoiled)
-- Color-coded detection (green=fresh, red=spoiled)
-
-**Servo Configuration:**
-- Fresh: 0° (đi thẳng) - thay đổi từ 45°
-- Spoiled: 180° (gạt phải) - thay đổi từ 135°
-- Center: 90° (neutral)
-
-**Documentation:**
-- Gộp tài liệu thành 1 file: `docs/SYSTEM_SETUP.md`
-- Hướng dẫn cải thiện accuracy cho 3 loại trái
-- Timing optimization guide
-
-### Hoàn Thành
-- ✅ Code: Python 3000+ LOC
-- ✅ Web Interface: Dashboard đầy đủ
-- ✅ Documentation: Hướng dẫn chi tiết
-- ✅ Testing: Scripts kiểm tra
-- ✅ Deployment: Sẵn sàng production
+Contributions welcome! Areas for improvement:
+- [ ] Support more fruit types
+- [ ] Improve accuracy for edge cases
+- [ ] Add more evaluation metrics
+- [ ] Optimize for Raspberry Pi 5
+- [ ] Add conveyor speed auto-adjustment
 
 ---
 
-## 🎯 Next Steps
+## 📝 LICENSE
 
-1. **Hardware Assembly**: Lắp ráp phần cứng theo [docs/SYSTEM_SETUP.md](docs/SYSTEM_SETUP.md)
-2. **Software Installation**: Chạy `./install.sh`
-3. **Data Collection**: Thu thập 200+ ảnh/class
-4. **Training**: Train models (trên Pi hoặc PC/GPU)
-5. **Testing**: Test toàn bộ hệ thống
-6. **Production**: Chạy hệ thống thực tế
+MIT License - See [LICENSE](LICENSE) file
 
 ---
 
-## 👨‍💻 Author
+## 👥 TEAM
 
-**Minh Phuong** - 2025
-
-Development of a Conveyor System for Fruit Quality Classification Using AI Camera
-
----
-
-## 📝 License
-
-MIT License
+**Truong Thi Minh Phuong**  
+📧 Email: [your-email@example.com](mailto:your-email@example.com)  
+🔗 GitHub: [@TruongThiMinhPhuong](https://github.com/TruongThiMinhPhuong)
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 2025-12-17  
-**Status**: Production Ready ✅
+## 🎓 ACKNOWLEDGMENTS
+
+- YOLOv8 by Ultralytics
+- MobileNetV2 by Google
+- TensorFlow Lite
+- Raspberry Pi Foundation
+
+---
+
+## 📖 MORE DOCS
+
+<details>
+<summary>📚 Tất cả tài liệu (click để mở)</summary>
+
+### Training
+- [`HƯỚNG_DẪN_TRAIN.md`](HƯỚNG_DẪN_TRAIN.md) - Complete training guide ⭐
+- [`TRAIN_README.md`](TRAIN_README.md) - Training overview
+- [`Train_MobileNet_Colab.ipynb`](Train_MobileNet_Colab.ipynb) - Colab notebook
+- [`docs/TRAIN_WITH_COLAB_VI.md`](docs/TRAIN_WITH_COLAB_VI.md) - Colab details
+- [`docs/TRAIN_RASPI_COLAB.md`](docs/TRAIN_RASPI_COLAB.md) - Train from Pi
+
+### Setup & Deployment
+- [`docs/QUICK_START_RPI_VI.md`](docs/QUICK_START_RPI_VI.md) - Pi quick start ⭐
+- [`docs/COMPLETE_SETUP.md`](docs/COMPLETE_SETUP.md) - Full setup guide
+- [`docs/SYSTEM_SETUP.md`](docs/SYSTEM_SETUP.md) - System architecture
+
+### Evaluation
+- [`docs/ĐÁNH_GIÁ_HỆ_THỐNG.md`](docs/ĐÁNH_GIÁ_HỆ_THỐNG.md) - Evaluation guide ⭐
+- [`evaluate_system.py`](evaluate_system.py) - Evaluation script
+
+### Technical
+- [`docs/RASPBERRY_PI_PROCESSING.md`](docs/RASPBERRY_PI_PROCESSING.md) - Pi architecture
+- [`docs/FRESH_SPOILED_FIX.md`](docs/FRESH_SPOILED_FIX.md) - Performance fixes
+- [`docs/README.md`](docs/README.md) - Docs navigation
+
+</details>
+
+---
+
+<div align="center">
+
+### 🎉 Ready to sort fruits with AI!
+
+**Star ⭐ this repo if you find it helpful!**
+
+[🚀 Get Started](#-quick-start) • [📖 Docs](#-tài-liệu-chính) • [🐛 Issues](https://github.com/TruongThiMinhPhuong/System_Conveyor/issues)
+
+</div>
