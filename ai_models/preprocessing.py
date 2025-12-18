@@ -17,7 +17,8 @@ class ImagePreprocessor:
     def __init__(
         self,
         target_size: Tuple[int, int] = (224, 224),
-        blur_kernel: int = 5
+        blur_kernel: int = 5,
+        fast_mode: bool = True
     ):
         """
         Initialize preprocessor
@@ -25,9 +26,19 @@ class ImagePreprocessor:
         Args:
             target_size: Target image size for model input (width, height)
             blur_kernel: Gaussian blur kernel size (odd number)
+            fast_mode: Use faster preprocessing (reduced quality for real-time)
         """
         self.target_size = target_size
         self.blur_kernel = blur_kernel if blur_kernel % 2 == 1 else blur_kernel + 1
+        self.fast_mode = fast_mode
+        
+        # CLAHE settings optimized for fast mode
+        if fast_mode:
+            self.clahe_tile_size = (4, 4)  # Smaller tiles = faster
+            self.clahe_clip_limit = 2.0    # Lower clip = faster
+        else:
+            self.clahe_tile_size = (8, 8)  # Better quality
+            self.clahe_clip_limit = 3.0
         
     def extract_roi(
         self,
@@ -107,7 +118,7 @@ class ImagePreprocessor:
     
     def enhance_contrast(self, image: np.ndarray) -> np.ndarray:
         """
-        Enhance image contrast using CLAHE
+        Enhance image contrast using CLAHE (optimized for fast_mode)
         
         Args:
             image: Input image
@@ -119,8 +130,11 @@ class ImagePreprocessor:
         lab = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
         l, a, b = cv2.split(lab)
         
-        # Apply CLAHE to L channel
-        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        # Apply CLAHE to L channel with optimized settings
+        clahe = cv2.createCLAHE(
+            clipLimit=self.clahe_clip_limit,
+            tileGridSize=self.clahe_tile_size
+        )
         l = clahe.apply(l)
         
         # Merge channels

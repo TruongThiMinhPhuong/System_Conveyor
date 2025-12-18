@@ -14,7 +14,7 @@ sys.path.append(str(Path(__file__).parent))
 
 from hardware import ConveyorSystem
 from ai_models import YOLODetector, MobileNetClassifier, ImagePreprocessor
-from utils import Config, SystemLogger
+from utils import Config, SystemLogger, PerformanceMonitor, PerformanceTimer
 
 
 class FruitSortingSystem:
@@ -37,6 +37,9 @@ class FruitSortingSystem:
         self.classifier = None
         self.preprocessor = None
         
+        # Performance monitoring
+        self.perf_monitor = PerformanceMonitor(window_size=100)
+        
         self.is_running = False
         self.consecutive_errors = 0
         
@@ -56,9 +59,10 @@ class FruitSortingSystem:
             
             if not mobilenet_ok:
                 self.logger.error("MobileNetV2 model not found. Train first.")
+                self.logger.system_event("⚠️ Running in DETECTION ONLY mode (no classification)")
             
-            if not (yolo_ok or mobilenet_ok):
-                self.logger.error("No AI models found. Cannot proceed.")
+            if not yolo_ok:
+                self.logger.error("At least YOLO model is required. Cannot proceed.")
                 return False
             
             # Initialize hardware
@@ -95,7 +99,8 @@ class FruitSortingSystem:
             # Image Preprocessor
             self.preprocessor = ImagePreprocessor(
                 target_size=(Config.MOBILENET_INPUT_SIZE, Config.MOBILENET_INPUT_SIZE),
-                blur_kernel=Config.BLUR_KERNEL_SIZE
+                blur_kernel=Config.BLUR_KERNEL_SIZE,
+                fast_mode=Config.FAST_PREPROCESSING
             )
             
             self.logger.system_event("✅ System initialized successfully!")
@@ -116,53 +121,60 @@ class FruitSortingSystem:
             Processing result dictionary
         """
         try:
-            start_time = time.time()
+            # Record frame for FPS tracking
+            self.perf_monitor.record_frame()
             
-            # Step 1: YOLO Detection
-            detections = self.detector.detect(frame, verbose=False)
-            
-            if not detections:
-                return {'detected': False}
-            
-            # Get highest confidence detection
-            detection = max(detections, key=lambda x: x['confidence'])
-            
-            self.logger.detection(
-                detection['class_name'],
-                detection['confidence']
-            )
-            
-            # Step 2: Extract ROI and preprocess
-            bbox = detection['bbox']
-            preprocessed_roi = self.preprocessor.preprocess_complete_pipeline(
-                frame, bbox
-            )
-            
-            if preprocessed_roi is None:
-                self.logger.error("ROI extraction failed")
-                return {'detected': True, 'classified': False}
-            
-            # Step 3: MobileNetV2 Classification
-            classification = self.classifier.classify_with_details(preprocessed_roi)
-            
-            self.logger.classification(
-                classification['predicted_class'],
-                classification['confidence'],
-                classification['is_fresh']
-            )
-            
-            # Only sort if confidence is above threshold
-            if classification['confidence'] >= Config.CLASSIFICATION_THRESHOLD:
-                is_fresh = classification['is_fresh']
-            else:
-                # Default to fresh for low-confidence classifications
-                self.logger.system_event(
-                    f"Low confidence ({classification['confidence']:.2%}), "
-                    "defaulting to fresh"
+            with PerformanceTimer() as total_timer:
+                # Step 1: YOLO Detection
+                with PerformanceTimer(self.perf_monitor, 'yolo') as yolo_timer:
+                    detections = self.detector.detect(frame, verbose=False)
+                
+                if not detections:
+                    return {'detected': False}
+                
+                # Get highest confidence detection
+                detection = max(detections, key=lambda x: x['confidence'])
+                
+                self.logger.detection(
+                    detection['class_name'],
+                    detection['confidence']
                 )
-                is_fresh = True
+                
+                # Step 2: Extract ROI and preprocess
+                bbox = detection['bbox']
+                
+                with PerformanceTimer(self.perf_monitor, 'preprocessing'):
+                    preprocessed_roi = self.preprocessor.preprocess_complete_pipeline(
+                        frame, bbox
+                    )
+                
+                if preprocessed_roi is None:
+                    self.logger.error("ROI extraction failed")
+                    return {'detected': True, 'classified': False}
+                
+                # Step 3: MobileNetV2 Classification
+                with PerformanceTimer(self.perf_monitor, 'mobilenet'):
+                    classification = self.classifier.classify_with_details(preprocessed_roi)
+                
+                self.logger.classification(
+                    classification['predicted_class'],
+                    classification['confidence'],
+                    classification['is_fresh']
+                )
+                
+                # Only sort if confidence is above threshold
+                if classification['confidence'] >= Config.CLASSIFICATION_THRESHOLD:
+                    is_fresh = classification['is_fresh']
+                else:
+                    # Default to fresh for low-confidence classifications
+                    self.logger.system_event(
+                        f"Low confidence ({classification['confidence']:.2%}), "
+                        "defaulting to fresh"
+                    )
+                    is_fresh = True
             
-            processing_time = time.time() - start_time
+            # Record total processing time
+            self.perf_monitor.record_total_time(total_timer.duration)
             
             return {
                 'detected': True,
@@ -170,11 +182,12 @@ class FruitSortingSystem:
                 'detection': detection,
                 'classification': classification,
                 'is_fresh': is_fresh,
-                'processing_time': processing_time
+                'processing_time': total_timer.duration
             }
             
         except Exception as e:
             self.logger.error("Frame processing failed", e)
+            self.perf_monitor.record_error()
             return {'error': str(e)}
     
     def run(self):
@@ -227,6 +240,7 @@ class FruitSortingSystem:
                     # Print statistics periodically
                     if time.time() - last_stats_time >= Config.STATS_UPDATE_INTERVAL:
                         self.logger.print_statistics()
+                        self.perf_monitor.print_stats()
                         last_stats_time = time.time()
                     
                     # Control FPS

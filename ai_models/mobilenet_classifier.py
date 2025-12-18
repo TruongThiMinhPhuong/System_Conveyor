@@ -41,7 +41,7 @@ class MobileNetClassifier:
         
     def load_model(self) -> bool:
         """
-        Load TFLite model
+        Load TFLite model with hardware acceleration
         
         Returns:
             True if successful, False otherwise
@@ -54,8 +54,29 @@ class MobileNetClassifier:
                 print("   Please train the model first using training/mobilenet/train_mobilenet.py")
                 return False
             
-            # Load TFLite model
-            self.interpreter = tflite.Interpreter(model_path=self.model_path)
+            # Try to load with hardware acceleration
+            try:
+                # Try XNNPACK delegate first (ARM NEON optimization)
+                print("   Attempting XNNPACK delegate (ARM optimization)...")
+                self.interpreter = tflite.Interpreter(
+                    model_path=self.model_path,
+                    experimental_delegates=[tflite.load_delegate('libXNNPACK.so')]
+                )
+                print("   ✅ Using XNNPACK delegate")
+            except:
+                try:
+                    # Try GPU delegate as fallback
+                    print("   Attempting GPU delegate...")
+                    self.interpreter = tflite.Interpreter(
+                        model_path=self.model_path,
+                        experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')]
+                    )
+                    print("   ✅ Using GPU delegate")
+                except:
+                    # Fall back to CPU
+                    print("   Using CPU inference (no hardware acceleration)")
+                    self.interpreter = tflite.Interpreter(model_path=self.model_path)
+            
             self.interpreter.allocate_tensors()
             
             # Get input and output details

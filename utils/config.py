@@ -21,7 +21,7 @@ class Config:
     MOBILENET_MODEL_PATH = str(MODELS_DIR / "mobilenet_classifier.tflite")
     
     # ======== Camera Settings ========
-    CAMERA_RESOLUTION = (640, 480)  # Lower resolution for faster processing
+    CAMERA_RESOLUTION = (416, 416)  # Optimized for YOLO and real-time processing
     CAMERA_FRAMERATE = 30
     CAMERA_ROTATION = 0  # 0, 90, 180, or 270
     
@@ -37,9 +37,9 @@ class Config:
     # ======== AI Model Settings ========
     
     # YOLO Detection
-    YOLO_CONFIDENCE_THRESHOLD = 0.5  # Minimum detection confidence
-    YOLO_IOU_THRESHOLD = 0.45        # IoU threshold for NMS
-    YOLO_INPUT_SIZE = 640            # Input image size for YOLO
+    YOLO_CONFIDENCE_THRESHOLD = 0.45  # Slightly lower for faster detection
+    YOLO_IOU_THRESHOLD = 0.45         # IoU threshold for NMS
+    YOLO_INPUT_SIZE = 416             # Reduced for faster inference (was 640)
     
     # MobileNetV2 Classification
     MOBILENET_INPUT_SIZE = 224       # Input size (224x224)
@@ -67,10 +67,10 @@ class Config:
     # Camera to Servo Distance (measured in cm)
     CAMERA_TO_SERVO_DISTANCE = 20.0  # Distance from camera to servo gate
     
-    # Detection and processing
-    DETECTION_INTERVAL = 0.1         # Seconds between detections
-    DETECTION_ZONE_DELAY = 0.5       # Time in detection zone
-    PROCESSING_TIMEOUT = 1.5         # Max time for AI processing (increased)
+    # Detection and processing (optimized for real-time)
+    DETECTION_INTERVAL = 0.05        # Faster detection checks (was 0.1)
+    DETECTION_ZONE_DELAY = 0.3       # Reduced for faster throughput
+    PROCESSING_TIMEOUT = 0.5         # Tighter timeout for real-time (was 1.5)
     
     # Motor control timing - Optimized for 20cm distance
     SERVO_MOVE_DELAY = 0.6          # Time for servo to move (increased)
@@ -86,10 +86,11 @@ class Config:
     # ROI extraction
     ROI_PADDING = 10  # Pixels to pad around detection
     
-    # Preprocessing options
-    APPLY_BLUR = True
-    BLUR_KERNEL_SIZE = 5
-    ENHANCE_CONTRAST = True
+    # Preprocessing options (optimized for real-time)
+    FAST_PREPROCESSING = True  # Use fast mode for real-time processing
+    APPLY_BLUR = True          # Light blur to reduce noise
+    BLUR_KERNEL_SIZE = 3       # Smaller kernel = faster (was 5)
+    ENHANCE_CONTRAST = True    # CLAHE for better classification
     
     # HSV color filtering (optional, for specific scenarios)
     USE_HSV_FILTER = False
@@ -111,9 +112,10 @@ class Config:
     CONTINUOUS_MODE = True  # Continuous operation vs single-shot
     VISUAL_DEBUG = False  # Save annotated images for debugging
     
-    # Performance
-    MAX_FPS = 25  # Maximum processing FPS (increased)
-    SKIP_FRAMES = 0  # Number of frames to skip between processing
+    # Performance (optimized for Raspberry Pi 4)
+    MAX_FPS = 30  # Maximum processing FPS
+    SKIP_FRAMES = 0  # Process every frame
+    USE_THREADING = True  # Enable multi-threading where possible
     
     # Safety
     ENABLE_EMERGENCY_STOP = True

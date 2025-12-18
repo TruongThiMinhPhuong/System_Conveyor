@@ -11,15 +11,15 @@ if __name__ == '__main__':
     print("🌐 AI Fruit Sorting System - Web Interface")
     print("=" * 60)
     print(f"\n🔗 Access the interface at:")
-    print(f"   🌐 Access: http://192.168.137.177:5000")
-    print(f"   📱 Mobile: http://192.168.137.177:5000")
+    print(f"   🌐 Access: http://192.168.137.177:5001")
+    print(f"   📱 Mobile: http://192.168.137.177:5001")
     print(f"\n📝 Press Ctrl+C to stop the server\n")
     
-    # Run with SocketIO
+    # Run with SocketIO on port 5001
     socketio.run(
         app,
         host='0.0.0.0',
-        port=5000,
+        port=5001,
         debug=False,
         allow_unsafe_werkzeug=True
     )

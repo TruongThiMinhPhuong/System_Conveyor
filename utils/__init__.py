@@ -2,5 +2,6 @@
 
 from .config import Config
 from .logger import setup_logger, SystemLogger
+from .performance import PerformanceMonitor, PerformanceTimer
 
-__all__ = ['Config', 'setup_logger', 'SystemLogger']
+__all__ = ['Config', 'setup_logger', 'SystemLogger', 'PerformanceMonitor', 'PerformanceTimer']
