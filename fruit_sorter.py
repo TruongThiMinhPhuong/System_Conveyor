@@ -230,10 +230,10 @@ class FruitSortingSystem:
                     result = self.process_frame(frame)
                     
                     if result.get('classified'):
-                        # Sort fruit
+                        # Sort fruit based on freshness
                         is_fresh = result['is_fresh']
                         self.logger.sorting(is_fresh)
-                        self.conveyor.sort_fruit(is_fresh, pause_conveyor=True)
+                        self.conveyor.sort_fruit(is_fresh=is_fresh, pause_conveyor=True)
                     
                     frame_count += 1
                     

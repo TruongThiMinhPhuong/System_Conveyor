@@ -145,47 +145,103 @@ class SystemEvaluator:
         
         return result
     
-    def evaluate_dataset(self, test_dir):
+    def evaluate_dataset(self, test_dir, batch_size=10, save_interval=50, max_images=None):
         """
-        Đánh giá toàn bộ dataset test
-        
+        Đánh giá toàn bộ dataset test với batch processing và progress tracking
+
         Args:
             test_dir: Thư mục chứa ảnh test
                       test_dir/fresh/*.jpg
                       test_dir/spoiled/*.jpg
+            batch_size: Số ảnh xử lý mỗi batch
+            save_interval: Lưu kết quả sau mỗi N ảnh
+            max_images: Giới hạn số ảnh xử lý (None = tất cả)
         """
         test_path = Path(test_dir)
-        
+
         print(f"\n{'='*60}")
         print(f"Đánh Giá Dataset: {test_dir}")
         print(f"{'='*60}\n")
-        
+
         # Collect images
         fresh_images = list((test_path / 'fresh').glob('*.[jp][pn][g]*'))
         spoiled_images = list((test_path / 'spoiled').glob('*.[jp][pn][g]*'))
-        
+
         print(f"📊 Dataset:")
         print(f"   Fresh: {len(fresh_images)} images")
         print(f"   Spoiled: {len(spoiled_images)} images")
         print(f"   Total: {len(fresh_images) + len(spoiled_images)} images")
-        
-        # Evaluate fresh images
-        print(f"\n🍏 Evaluating Fresh images...")
-        for img_path in fresh_images:
-            result = self.evaluate_single_image(img_path, 'fresh')
-            self.results.append(result)
-            
-        # Evaluate spoiled images
-        print(f"🍎 Evaluating Spoiled images...")
-        for img_path in spoiled_images:
-            result = self.evaluate_single_image(img_path, 'spoiled')
-            self.results.append(result)
-        
-        # Calculate metrics
-        self.calculate_metrics()
-        
-        # Save results
-        self.save_results()
+        print(f"   Batch size: {batch_size}")
+        print(f"   Save interval: {save_interval}")
+
+        # Combine all images with labels
+        all_images = [(img, 'fresh') for img in fresh_images] + [(img, 'spoiled') for img in spoiled_images]
+
+        # Limit images if specified
+        if max_images and len(all_images) > max_images:
+            print(f"   Limited to: {max_images} images (quick test mode)")
+            all_images = all_images[:max_images]
+
+        total_images = len(all_images)
+
+        # Progress tracking
+        processed = 0
+        start_time = time.time()
+
+        print(f"\n🚀 Starting evaluation of {total_images} images...")
+
+        try:
+            # Process in batches
+            for i in range(0, total_images, batch_size):
+                batch = all_images[i:i+batch_size]
+                batch_start = time.time()
+
+                print(f"\n📦 Processing batch {i//batch_size + 1}/{(total_images + batch_size - 1)//batch_size}")
+                print(f"   Images {i+1}-{min(i+batch_size, total_images)} of {total_images}")
+
+                for img_path, label in batch:
+                    try:
+                        result = self.evaluate_single_image(img_path, label)
+                        self.results.append(result)
+                        processed += 1
+
+                        # Progress update every 5 images
+                        if processed % 5 == 0:
+                            elapsed = time.time() - start_time
+                            rate = processed / elapsed if elapsed > 0 else 0
+                            remaining = (total_images - processed) / rate if rate > 0 else 0
+                            print(f"   📊 Progress: {processed}/{total_images} "
+                                  f"({processed/total_images*100:.1f}%) - "
+                                  f"{rate:.1f} img/s - ETA: {remaining:.0f}s")
+
+                    except KeyboardInterrupt:
+                        print(f"\n⚠️  KeyboardInterrupt detected at image {processed+1}")
+                        raise
+                    except Exception as e:
+                        print(f"   ❌ Error processing {img_path}: {e}")
+                        self.stats['processing_errors'] += 1
+                        continue
+
+                batch_time = time.time() - batch_start
+                print(f"   ✅ Batch completed in {batch_time:.1f}s")
+
+                # Save intermediate results
+                if processed % save_interval == 0 and processed > 0:
+                    print(f"   💾 Saving intermediate results...")
+                    self.calculate_metrics()
+                    self.save_results(intermediate=True)
+
+            # Final calculation and save
+            print(f"\n🎯 Evaluation completed! Processed {processed}/{total_images} images")
+            self.calculate_metrics()
+            self.save_results()
+
+        except KeyboardInterrupt:
+            print(f"\n⏹️  Evaluation interrupted at {processed}/{total_images} images")
+            print("💾 Saving partial results...")
+            self.calculate_metrics()
+            self.save_results(intermediate=True, interrupted=True)
+            raise
         
     def calculate_metrics(self):
         """Tính toán các metrics đánh giá"""
@@ -382,60 +438,90 @@ class SystemEvaluator:
             print("   - Kiểm tra XNNPACK delegate")
             print("   - Xem xét dùng Pi 5 hoặc Coral TPU")
     
-    def save_results(self):
+    def save_results(self, intermediate=False, interrupted=False):
         """Lưu kết quả ra file"""
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
+        suffix = "_intermediate" if intermediate else ("_interrupted" if interrupted else "")
+
         # Save detailed results
-        results_file = self.output_dir / f"evaluation_{timestamp}.json"
+        results_file = self.output_dir / f"evaluation_{timestamp}{suffix}.json"
         with open(results_file, 'w', encoding='utf-8') as f:
             json.dump({
-                'metrics': self.metrics,
+                'metadata': {
+                    'timestamp': datetime.now().isoformat(),
+                    'intermediate': intermediate,
+                    'interrupted': interrupted,
+                    'total_images_processed': len(self.results)
+                },
+                'metrics': getattr(self, 'metrics', {}),
                 'stats': dict(self.stats),
                 'results': self.results
             }, f, indent=2, ensure_ascii=False)
-        
+
         print(f"💾 Kết quả đã lưu: {results_file}")
-        
-        # Save summary report
-        report_file = self.output_dir / f"report_{timestamp}.txt"
-        with open(report_file, 'w', encoding='utf-8') as f:
-            f.write("="*60 + "\n")
-            f.write("BÁO CÁO ĐÁNH GIÁ HỆ THỐNG\n")
-            f.write("="*60 + "\n\n")
-            f.write(f"Thời gian: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-            f.write(f"Accuracy: {self.metrics['accuracy']:.2%}\n")
-            f.write(f"F1 Fresh: {self.metrics['fresh']['f1_score']:.2%}\n")
-            f.write(f"F1 Spoiled: {self.metrics['spoiled']['f1_score']:.2%}\n")
-            f.write(f"Avg FPS: {self.metrics['performance']['estimated_fps']:.1f}\n")
-        
-        print(f"📄 Báo cáo đã lưu: {report_file}")
+
+        # Save summary report only for final results
+        if not intermediate and hasattr(self, 'metrics'):
+            report_file = self.output_dir / f"report_{timestamp}{suffix}.txt"
+            with open(report_file, 'w', encoding='utf-8') as f:
+                f.write("="*60 + "\n")
+                f.write("BÁO CÁO ĐÁNH GIÁ HỆ THỐNG\n")
+                f.write("="*60 + "\n\n")
+                f.write(f"Thời gian: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                if intermediate:
+                    f.write("TRẠNG THÁI: KẾT QUẢ TẠM THỜI\n\n")
+                elif interrupted:
+                    f.write("TRẠNG THÁI: ĐÃ DỪNG (INTERRUPTED)\n\n")
+                else:
+                    f.write("TRẠNG THÁI: HOÀN THÀNH\n\n")
+                f.write(f"Số ảnh đã xử lý: {len(self.results)}\n")
+                f.write(f"Accuracy: {self.metrics.get('accuracy', 0):.2%}\n")
+                f.write(f"F1 Fresh: {self.metrics.get('fresh', {}).get('f1_score', 0):.2%}\n")
+                f.write(f"F1 Spoiled: {self.metrics.get('spoiled', {}).get('f1_score', 0):.2%}\n")
+                f.write(f"Avg FPS: {self.metrics.get('performance', {}).get('estimated_fps', 0):.1f}\n")
+
+            print(f"📄 Báo cáo đã lưu: {report_file}")
 
 
 def main():
     """Main evaluation function"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Đánh giá độ chính xác hệ thống")
     parser.add_argument('--test_dir', type=str, required=True,
                        help="Thư mục chứa ảnh test (có subfolder fresh/ và spoiled/)")
     parser.add_argument('--output', type=str, default='evaluation_results',
                        help="Thư mục lưu kết quả")
-    
+    parser.add_argument('--batch_size', type=int, default=10,
+                       help="Số ảnh xử lý mỗi batch (default: 10)")
+    parser.add_argument('--save_interval', type=int, default=50,
+                       help="Lưu kết quả sau mỗi N ảnh (default: 50)")
+    parser.add_argument('--quick_test', action='store_true',
+                       help="Chạy test nhanh với ít ảnh (20 ảnh đầu tiên)")
+
     args = parser.parse_args()
-    
+
     # Create evaluator
     evaluator = SystemEvaluator(output_dir=args.output)
-    
+
     # Load models
     evaluator.load_models()
-    
+
     # Run evaluation
-    evaluator.evaluate_dataset(args.test_dir)
-    
-    # Print results
-    evaluator.print_results()
+    try:
+        if args.quick_test:
+            print("\n🧪 QUICK TEST MODE: Chỉ xử lý 20 ảnh đầu tiên")
+            evaluator.evaluate_dataset(args.test_dir, batch_size=5, save_interval=10, max_images=20)
+        else:
+            evaluator.evaluate_dataset(args.test_dir, args.batch_size, args.save_interval)
+
+        # Print results
+        evaluator.print_results()
+
+    except KeyboardInterrupt:
+        print("\n⏹️  Đã dừng đánh giá theo yêu cầu người dùng")
+        print("Kết quả tạm thời đã được lưu tự động")
 
 
 if __name__ == "__main__":

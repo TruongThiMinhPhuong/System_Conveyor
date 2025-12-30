@@ -21,7 +21,7 @@ class Config:
     MOBILENET_MODEL_PATH = str(MODELS_DIR / "mobilenet_classifier.tflite")
     
     # ======== Camera Settings ========
-    CAMERA_RESOLUTION = (416, 416)  # Optimized for YOLO and real-time processing
+    CAMERA_RESOLUTION = (320, 320)  # Optimized for speed (reduced from 416x416)
     CAMERA_FRAMERATE = 30
     CAMERA_ROTATION = 0  # 0, 90, 180, or 270
     
@@ -37,25 +37,25 @@ class Config:
     # ======== AI Model Settings ========
     
     # YOLO Detection
-    YOLO_CONFIDENCE_THRESHOLD = 0.45  # Slightly lower for faster detection
+    YOLO_CONFIDENCE_THRESHOLD = 0.35  # Lower threshold for better detection
     YOLO_IOU_THRESHOLD = 0.45         # IoU threshold for NMS
-    YOLO_INPUT_SIZE = 416             # Reduced for faster inference (was 640)
+    YOLO_INPUT_SIZE = 320             # Reduced for faster inference (was 416)
     
     # MobileNetV2 Classification
     MOBILENET_INPUT_SIZE = 224       # Input size (224x224)
     CLASSIFICATION_THRESHOLD = 0.6   # Minimum confidence for classification
     
-    # Class names
-    FRUIT_CLASSES = ['apple', 'orange', 'banana']  # Update based on your dataset
-    FRESHNESS_CLASSES = ('Fresh', 'Spoiled')
+    # Class names - Fresh/Spoiled classification
+    FRUIT_CLASSES = ['fresh', 'spoiled']  # tươi, hỏng
+    FRESHNESS_CLASSES = ('Fresh', 'Spoiled')  # Tươi, Hỏng
     
     # ======== Hardware Settings ========
     
     # Conveyor motor speeds (0-100%) - Optimized for 20cm distance
-    CONVEYOR_SPEED_DEFAULT = 35       # Slower for 20cm distance precision
+    CONVEYOR_SPEED_DEFAULT = 70       # Default speed set to 70%
     CONVEYOR_SPEED_FAST = 60          # Fast mode (no detection)
     CONVEYOR_SPEED_SLOW = 20          # Very slow for calibration
-    CONVEYOR_SPEED_DETECTION = 35     # Speed during detection (2.92 cm/s)
+    CONVEYOR_SPEED_DETECTION = 70     # Speed during detection
     
     # Servo angles (0-180 degrees)
     SERVO_ANGLE_FRESH = 0      # Fresh fruit - Go straight (0°)
@@ -88,9 +88,9 @@ class Config:
     
     # Preprocessing options (optimized for real-time)
     FAST_PREPROCESSING = True  # Use fast mode for real-time processing
-    APPLY_BLUR = True          # Light blur to reduce noise
-    BLUR_KERNEL_SIZE = 3       # Smaller kernel = faster (was 5)
-    ENHANCE_CONTRAST = True    # CLAHE for better classification
+    APPLY_BLUR = False         # Disabled for speed (was True)
+    BLUR_KERNEL_SIZE = 3       # Smaller kernel = faster
+    ENHANCE_CONTRAST = True    # CLAHE for better classification (critical for accuracy)
     
     # HSV color filtering (optional, for specific scenarios)
     USE_HSV_FILTER = False

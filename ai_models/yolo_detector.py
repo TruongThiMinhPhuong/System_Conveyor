@@ -86,12 +86,15 @@ class YOLODetector:
             return []
         
         try:
-            # Run inference
+            # Run inference with optimizations for speed
             results = self.model(
                 image,
                 conf=self.confidence_threshold,
                 iou=self.iou_threshold,
-                verbose=verbose
+                verbose=verbose,
+                imgsz=320,  # Force 320x320 input for speed
+                half=False,  # FP16 not supported on CPU, keep False
+                device='cpu'  # Explicit CPU device
             )
             
             detections = []

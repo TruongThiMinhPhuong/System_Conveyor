@@ -136,7 +136,7 @@ class ServoControl:
     def move_to_fresh(self) -> bool:
         """
         Move servo to fresh position (0° - straight through)
-        
+
         Returns:
             True if successful
         """
@@ -145,11 +145,11 @@ class ServoControl:
             gpio_config.SERVO_ANGLE_FRESH,
             gpio_config.SERVO_MOVE_DELAY
         )
-    
+
     def move_to_spoiled(self) -> bool:
         """
         Move servo to spoiled position (180° - push right)
-        
+
         Returns:
             True if successful
         """

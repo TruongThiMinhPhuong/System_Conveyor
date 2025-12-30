@@ -1,0 +1,12 @@
+# Raspberry Pi Runtime Requirements (Inference Only)
+tflite-runtime>=2.14.0
+opencv-python>=4.8.0
+numpy>=1.23.0
+Pillow>=9.5.0
+picamera2>=0.3.12
+gpiozero>=2.0.0
+RPi.GPIO>=0.7.1
+ultralytics>=8.0.0
+flask>=2.3.0
+flask-socketio>=5.3.0
+python-socketio>=5.9.0

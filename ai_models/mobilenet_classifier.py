@@ -6,10 +6,29 @@ Fresh/Spoiled fruit classification using TensorFlow Lite
 import numpy as np
 from pathlib import Path
 from typing import Tuple, Optional
+
+# Try different TensorFlow imports
+TFLITE_AVAILABLE = False
+TF_AVAILABLE = False
+
 try:
     import tflite_runtime.interpreter as tflite
+    TFLITE_AVAILABLE = True
+    print("✅ Using tflite-runtime")
 except ImportError:
-    import tensorflow.lite as tflite
+    try:
+        import tensorflow.lite as tflite
+        TFLITE_AVAILABLE = True
+        print("✅ Using tensorflow.lite")
+    except ImportError:
+        print("⚠️ TFLite not available, trying TensorFlow")
+        try:
+            import tensorflow as tf
+            TF_AVAILABLE = True
+            print("✅ Using TensorFlow (fallback)")
+        except ImportError:
+            print("❌ Neither TFLite nor TensorFlow available")
+            raise ImportError("TensorFlow or TFLite required")
 
 
 class MobileNetClassifier:
@@ -54,7 +73,7 @@ class MobileNetClassifier:
                 print("   Please train the model first using training/mobilenet/train_mobilenet.py")
                 return False
             
-            # Try to load with hardware acceleration
+            # Try to load with hardware acceleration and multi-threading
             try:
                 # Try XNNPACK delegate first (ARM NEON optimization)
                 print("   Attempting XNNPACK delegate (ARM optimization)...")
@@ -63,7 +82,8 @@ class MobileNetClassifier:
                     experimental_delegates=[tflite.load_delegate('libXNNPACK.so')]
                 )
                 print("   ✅ Using XNNPACK delegate")
-            except:
+            except Exception as e:
+                print(f"   XNNPACK failed: {e}")
                 try:
                     # Try GPU delegate as fallback
                     print("   Attempting GPU delegate...")
@@ -72,10 +92,25 @@ class MobileNetClassifier:
                         experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')]
                     )
                     print("   ✅ Using GPU delegate")
-                except:
-                    # Fall back to CPU
-                    print("   Using CPU inference (no hardware acceleration)")
-                    self.interpreter = tflite.Interpreter(model_path=self.model_path)
+                except Exception as e:
+                    print(f"   GPU delegate failed: {e}")
+                    # Fall back to CPU with multi-threading
+                    print("   Using CPU inference with multi-threading...")
+                    try:
+                        self.interpreter = tflite.Interpreter(
+                            model_path=self.model_path,
+                            num_threads=4  # Use 4 CPU cores for parallel processing
+                        )
+                        print("   ✅ Using 4 threads for CPU inference")
+                    except Exception as e:
+                        print(f"   Multi-threaded CPU failed: {e}")
+                        # Final fallback to single-threaded
+                        print("   Attempting single-threaded CPU...")
+                        import numpy as np
+                        # Force numpy 1.x compatibility if available
+                        if hasattr(np, '_ARRAY_API'):
+                            print("   ⚠️ NumPy 2.x detected, model may have compatibility issues")
+                        self.interpreter = tflite.Interpreter(model_path=self.model_path)
             
             self.interpreter.allocate_tensors()
             
@@ -160,26 +195,35 @@ class MobileNetClassifier:
                 self.output_details[0]['index']
             )[0]
             
-            # Get prediction
-            if len(output_data) == 2:
-                # Binary classification: [fresh_prob, spoiled_prob]
-                fresh_prob = float(output_data[0])
-                spoiled_prob = float(output_data[1])
+            # Get prediction for 3-class classification
+            if len(output_data) == 3:
+                # 3-class classification: [orange_prob, guava_prob, apple_prob]
+                probabilities = [float(p) for p in output_data]
+                max_prob_index = np.argmax(probabilities)
+                class_name = self.class_names[max_prob_index]
+                confidence = probabilities[max_prob_index]
+            elif len(output_data) == 2:
+                # Binary classification fallback: [class0_prob, class1_prob]
+                probabilities = [float(p) for p in output_data]
+                max_prob_index = np.argmax(probabilities)
+                class_name = self.class_names[max_prob_index]
+                confidence = probabilities[max_prob_index]
             else:
-                # Single output (sigmoid): fresh_prob
-                fresh_prob = float(output_data[0])
-                spoiled_prob = 1.0 - fresh_prob
-            
-            # Determine class
-            if fresh_prob > spoiled_prob:
-                class_name = self.class_names[0]  # Fresh
-                confidence = fresh_prob
-            else:
-                class_name = self.class_names[1]  # Spoiled
-                confidence = spoiled_prob
-            
+                # Single output (sigmoid) - fallback to binary
+                prob = float(output_data[0])
+                if prob > 0.5:
+                    class_name = self.class_names[0]
+                    confidence = prob
+                else:
+                    class_name = self.class_names[1]
+                    confidence = 1.0 - prob
+                probabilities = [prob, 1.0 - prob]
+
             if return_probabilities:
-                return (class_name, confidence, [fresh_prob, spoiled_prob])
+                # Ensure we return probabilities for all 3 classes
+                if len(probabilities) < 3:
+                    probabilities.extend([0.0] * (3 - len(probabilities)))
+                return (class_name, confidence, probabilities[:3])
             else:
                 return (class_name, confidence)
             
@@ -205,10 +249,10 @@ class MobileNetClassifier:
     def classify_with_details(self, image: np.ndarray) -> dict:
         """
         Classify and return detailed results
-        
+
         Args:
             image: Preprocessed input image
-            
+
         Returns:
             Dictionary with classification details
         """
@@ -216,14 +260,17 @@ class MobileNetClassifier:
             image,
             return_probabilities=True
         )
-        
-        return {
+
+        # For binary classification (Fresh/Spoiled)
+        result = {
             'predicted_class': class_name,
             'confidence': confidence,
-            'is_fresh': class_name == self.class_names[0],
-            'fresh_probability': probs[0],
-            'spoiled_probability': probs[1]
+            'is_fresh': class_name == self.class_names[0],  # Fresh is class 0
+            'fresh_probability': probs[0] if len(probs) > 0 else 0.0,
+            'spoiled_probability': probs[1] if len(probs) > 1 else 0.0
         }
+
+        return result
     
     def test(self):
         """

@@ -1,0 +1,198 @@
+{
+  "metadata": {
+    "timestamp": "2025-12-19T11:32:54.171681",
+    "intermediate": true,
+    "interrupted": false,
+    "total_images_processed": 10
+  },
+  "metrics": {
+    "confusion_matrix": {
+      "true_positive_fresh": 7,
+      "true_negative_spoiled": 0,
+      "false_positive_fresh": 0,
+      "false_negative_spoiled": 1
+    },
+    "accuracy": 0.875,
+    "fresh": {
+      "precision": 1.0,
+      "recall": 0.875,
+      "f1_score": 0.9333333333333333
+    },
+    "spoiled": {
+      "precision": 0.0,
+      "recall": 0,
+      "f1_score": 0
+    },
+    "performance": {
+      "avg_yolo_time_ms": 1182.3191344738007,
+      "avg_preprocessing_time_ms": 109.79470610618591,
+      "avg_classification_time_ms": 89.77413177490234,
+      "avg_total_time_ms": 1381.887972354889,
+      "estimated_fps": 0.7236476617535719
+    },
+    "confidences": {
+      "avg_detection_confidence": 0.9211378172039986,
+      "avg_classification_confidence": 0.6504935473203659
+    }
+  },
+  "stats": {
+    "correct": 7,
+    "total": 8,
+    "detection_failed": 2,
+    "incorrect": 1
+  },
+  "results": [
+    {
+      "image": "dataset/test/fresh/fresh_20251211_203853_0011.jpg",
+      "ground_truth": "fresh",
+      "timestamp": "2025-12-19T11:32:40.625223",
+      "yolo_time_ms": 1743.9091205596924,
+      "detected": true,
+      "detection_confidence": 0.9542205333709717,
+      "detection_class": "apple",
+      "preprocessing_time_ms": 330.68156242370605,
+      "classification_time_ms": 86.29012107849121,
+      "classified": true,
+      "predicted_class": "Fresh",
+      "classification_confidence": 0.78678297996521,
+      "is_fresh": true,
+      "total_time_ms": 2160.8808040618896,
+      "correct": true
+    },
+    {
+      "image": "dataset/test/fresh/fresh_20251211_203918_0034.jpg",
+      "ground_truth": "fresh",
+      "timestamp": "2025-12-19T11:32:42.812516",
+      "yolo_time_ms": 896.2104320526123,
+      "detected": true,
+      "detection_confidence": 0.9432535171508789,
+      "detection_class": "apple",
+      "preprocessing_time_ms": 66.91455841064453,
+      "classification_time_ms": 89.57767486572266,
+      "classified": true,
+      "predicted_class": "Fresh",
+      "classification_confidence": 0.662661075592041,
+      "is_fresh": true,
+      "total_time_ms": 1052.7026653289795,
+      "correct": true
+    },
+    {
+      "image": "dataset/test/fresh/fresh_20251211_203931_0046.jpg",
+      "ground_truth": "fresh",
+      "timestamp": "2025-12-19T11:32:43.891875",
+      "yolo_time_ms": 937.0427131652832,
+      "detected": true,
+      "detection_confidence": 0.9309150576591492,
+      "detection_class": "apple",
+      "preprocessing_time_ms": 87.05782890319824,
+      "classification_time_ms": 92.61226654052734,
+      "classified": true,
+      "predicted_class": "Fresh",
+      "classification_confidence": 0.7179421782493591,
+      "is_fresh": true,
+      "total_time_ms": 1116.7128086090088,
+      "correct": true
+    },
+    {
+      "image": "dataset/test/fresh/fresh_20251211_203906_0023.jpg",
+      "ground_truth": "fresh",
+      "timestamp": "2025-12-19T11:32:45.036327",
+      "yolo_time_ms": 1118.2665824890137,
+      "detected": true,
+      "detection_confidence": 0.9416321516036987,
+      "detection_class": "apple",
+      "preprocessing_time_ms": 67.97647476196289,
+      "classification_time_ms": 82.00454711914062,
+      "classified": true,
+      "predicted_class": "Fresh",
+      "classification_confidence": 0.7209428548812866,
+      "is_fresh": true,
+      "total_time_ms": 1268.2476043701172,
+      "correct": true
+    },
+    {
+      "image": "dataset/test/fresh/fresh_20251211_203919_0035.jpg",
+      "ground_truth": "fresh",
+      "timestamp": "2025-12-19T11:32:46.332586",
+      "yolo_time_ms": 1234.7002029418945,
+      "detected": true,
+      "detection_confidence": 0.937865138053894,
+      "detection_class": "apple",
+      "preprocessing_time_ms": 96.95649147033691,
+      "classification_time_ms": 96.12417221069336,
+      "classified": true,
+      "predicted_class": "Fresh",
+      "classification_confidence": 0.6893860101699829,
+      "is_fresh": true,
+      "total_time_ms": 1427.7808666229248,
+      "correct": true
+    },
+    {
+      "image": "dataset/test/fresh/fresh_20251211_204008_0079.jpg",
+      "ground_truth": "fresh",
+      "timestamp": "2025-12-19T11:32:47.790587",
+      "yolo_time_ms": 1157.789707183838,
+      "detected": false,
+      "correct": false
+    },
+    {
+      "image": "dataset/test/fresh/fresh_20251211_203902_0019.jpg",
+      "ground_truth": "fresh",
+      "timestamp": "2025-12-19T11:32:48.974789",
+      "yolo_time_ms": 1203.3116817474365,
+      "detected": true,
+      "detection_confidence": 0.9410026669502258,
+      "detection_class": "apple",
+      "preprocessing_time_ms": 81.58993721008301,
+      "classification_time_ms": 90.03949165344238,
+      "classified": true,
+      "predicted_class": "Spoiled",
+      "classification_confidence": 0.5144312977790833,
+      "is_fresh": false,
+      "total_time_ms": 1374.941110610962,
+      "correct": false
+    },
+    {
+      "image": "dataset/test/fresh/fresh_20251211_204013_0084.jpg",
+      "ground_truth": "fresh",
+      "timestamp": "2025-12-19T11:32:50.379000",
+      "yolo_time_ms": 1129.652738571167,
+      "detected": true,
+      "detection_confidence": 0.7794743776321411,
+      "detection_class": "apple",
+      "preprocessing_time_ms": 78.28593254089355,
+      "classification_time_ms": 89.0815258026123,
+      "classified": true,
+      "predicted_class": "Fresh",
+      "classification_confidence": 0.5567641854286194,
+      "is_fresh": true,
+      "total_time_ms": 1297.0201969146729,
+      "correct": true
+    },
+    {
+      "image": "dataset/test/fresh/fresh_20251211_204025_0095.jpg",
+      "ground_truth": "fresh",
+      "timestamp": "2025-12-19T11:32:51.705029",
+      "yolo_time_ms": 1071.3622570037842,
+      "detected": false,
+      "correct": false
+    },
+    {
+      "image": "dataset/test/fresh/fresh_20251211_203903_0020.jpg",
+      "ground_truth": "fresh",
+      "timestamp": "2025-12-19T11:32:52.813617",
+      "yolo_time_ms": 1195.4596042633057,
+      "detected": true,
+      "detection_confidence": 0.940739095211029,
+      "detection_class": "apple",
+      "preprocessing_time_ms": 68.89486312866211,
+      "classification_time_ms": 92.46325492858887,
+      "classified": true,
+      "predicted_class": "Fresh",
+      "classification_confidence": 0.555037796497345,
+      "is_fresh": true,
+      "total_time_ms": 1356.8177223205566,
+      "correct": true
+    }
+  ]
+}

@@ -34,8 +34,8 @@ class ImagePreprocessor:
         
         # CLAHE settings optimized for fast mode
         if fast_mode:
-            self.clahe_tile_size = (4, 4)  # Smaller tiles = faster
-            self.clahe_clip_limit = 2.0    # Lower clip = faster
+            self.clahe_tile_size = (2, 2)  # Smaller tiles = faster (reduced from 4x4)
+            self.clahe_clip_limit = 1.5    # Lower clip = faster (reduced from 2.0)
         else:
             self.clahe_tile_size = (8, 8)  # Better quality
             self.clahe_clip_limit = 3.0
@@ -163,6 +163,8 @@ class ImagePreprocessor:
         if size is None:
             size = self.target_size
         
+        # Use INTER_LINEAR for good quality/speed balance
+        # INTER_AREA is better for downsampling but slower
         return cv2.resize(image, size, interpolation=cv2.INTER_LINEAR)
     
     def normalize_image(self, image: np.ndarray) -> np.ndarray:
