@@ -107,6 +107,20 @@ class Config:
     
     # ======== System Behavior ========
     
+    # Operating Modes
+    # - NORMAL: Full AI (YOLO + MobileNet) required
+    # - DETECTION_ONLY: Only YOLO required, simple classification rules
+    # - MANUAL: No AI required, servo controlled by timer/manual
+    OPERATING_MODE = 'NORMAL'  # Options: 'NORMAL', 'DETECTION_ONLY', 'MANUAL'
+    
+    # Classification behavior
+    REQUIRE_CLASSIFICATION = True  # If False, servo works even without classification
+    DEFAULT_CLASSIFICATION = 'FRESH'  # Fallback when classification fails: 'FRESH', 'SPOILED', 'SKIP'
+    
+    # Manual mode settings
+    MANUAL_SORT_INTERVAL = 5.0  # Seconds between sorts in manual mode
+    MANUAL_DEFAULT_FRESH = True  # Default classification in manual mode
+    
     # Operation modes
     AUTO_START = False  # Auto-start conveyor on system startup
     CONTINUOUS_MODE = True  # Continuous operation vs single-shot
