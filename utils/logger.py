@@ -123,6 +123,10 @@ class SystemLogger:
             self.logger.error(f"❌ {message}")
         self.stats['errors'] += 1
     
+    def warning(self, message: str):
+        """Log warning"""
+        self.logger.warning(f"⚠️ {message}")
+    
     def system_event(self, message: str):
         """Log system event"""
         self.logger.info(f"⚙️ {message}")

@@ -72,24 +72,34 @@ class WebFruitSorter:
             if not self.conveyor.initialize():
                 return False
             
-            # Load AI models
-            self.detector = YOLODetector(
-                model_path=Config.YOLO_MODEL_PATH,
-                confidence_threshold=Config.YOLO_CONFIDENCE_THRESHOLD
-            )
+            # Load AI models - handle ImportError gracefully
+            try:
+                self.detector = YOLODetector(
+                    model_path=Config.YOLO_MODEL_PATH,
+                    confidence_threshold=Config.YOLO_CONFIDENCE_THRESHOLD
+                )
+                self.detector.load_model()
+            except (ImportError, NameError) as e:
+                self.logger.warning(f"YOLODetector not available: {e}")
+                self.detector = None
             
-            self.classifier = MobileNetClassifier(
-                model_path=Config.MOBILENET_MODEL_PATH,
-                input_size=Config.MOBILENET_INPUT_SIZE
-            )
+            try:
+                self.classifier = MobileNetClassifier(
+                    model_path=Config.MOBILENET_MODEL_PATH,
+                    input_size=Config.MOBILENET_INPUT_SIZE
+                )
+                self.classifier.load_model()
+            except (ImportError, NameError) as e:
+                self.logger.warning(f"MobileNetClassifier not available: {e}")
+                self.classifier = None
             
-            self.preprocessor = ImagePreprocessor(
-                target_size=(Config.MOBILENET_INPUT_SIZE, Config.MOBILENET_INPUT_SIZE)
-            )
-            
-            # Try to load models (OK if they don't exist yet)
-            self.detector.load_model()
-            self.classifier.load_model()
+            try:
+                self.preprocessor = ImagePreprocessor(
+                    target_size=(Config.MOBILENET_INPUT_SIZE, Config.MOBILENET_INPUT_SIZE)
+                )
+            except (ImportError, NameError) as e:
+                self.logger.warning(f"ImagePreprocessor not available: {e}")
+                self.preprocessor = None
             
             self.is_initialized = True
             self.logger.system_event("✅ Web system initialized")
