@@ -32,10 +32,10 @@ class ImagePreprocessor:
         self.blur_kernel = blur_kernel if blur_kernel % 2 == 1 else blur_kernel + 1
         self.fast_mode = fast_mode
         
-        # CLAHE settings optimized for fast mode
+        # CLAHE settings optimized for balanced accuracy/speed
         if fast_mode:
-            self.clahe_tile_size = (2, 2)  # Smaller tiles = faster (reduced from 4x4)
-            self.clahe_clip_limit = 1.5    # Lower clip = faster (reduced from 2.0)
+            self.clahe_tile_size = (4, 4)  # Balanced tiles (improved from 2x2)
+            self.clahe_clip_limit = 2.0    # Better quality (improved from 1.5)
         else:
             self.clahe_tile_size = (8, 8)  # Better quality
             self.clahe_clip_limit = 3.0
@@ -212,6 +212,47 @@ class ImagePreprocessor:
         image = self.normalize_image(image)
         
         return image
+    
+    def check_image_quality(
+        self,
+        image: np.ndarray,
+        min_brightness: int = 20,
+        max_brightness: int = 235
+    ) -> tuple[bool, str]:
+        """
+        Check if image quality is acceptable for processing
+        
+        Args:
+            image: Input image
+            min_brightness: Minimum acceptable average brightness
+            max_brightness: Maximum acceptable average brightness
+            
+        Returns:
+            Tuple of (is_acceptable, reason)
+        """
+        try:
+            # Convert to grayscale for analysis
+            if len(image.shape) == 3:
+                gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            else:
+                gray = image
+            
+            # Check brightness
+            mean_brightness = np.mean(gray)
+            if mean_brightness < min_brightness:
+                return False, f"Too dark (brightness: {mean_brightness:.1f})"
+            elif mean_brightness > max_brightness:
+                return False, f"Too bright (brightness: {mean_brightness:.1f})"
+            
+            # Check if image is too uniform (potentially blank)
+            std_dev = np.std(gray)
+            if std_dev < 10:
+                return False, f"Low variation (std: {std_dev:.1f})"
+            
+            return True, "OK"
+            
+        except Exception as e:
+            return False, f"Check failed: {e}"
     
     def preprocess_complete_pipeline(
         self,

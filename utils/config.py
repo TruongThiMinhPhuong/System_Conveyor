@@ -21,7 +21,7 @@ class Config:
     MOBILENET_MODEL_PATH = str(MODELS_DIR / "mobilenet_classifier.tflite")
     
     # ======== Camera Settings ========
-    CAMERA_RESOLUTION = (320, 320)  # Optimized for speed (reduced from 416x416)
+    CAMERA_RESOLUTION = (416, 416)  # Balanced for accuracy/speed (increased from 320x320)
     CAMERA_FRAMERATE = 30
     CAMERA_ROTATION = 0  # 0, 90, 180, or 270
     
@@ -29,21 +29,21 @@ class Config:
     WEB_STREAM_RESOLUTION = (640, 480)  # Resolution for web streaming
     JPEG_QUALITY = 70  # JPEG compression quality (1-100)
     
-    # Camera adjustments
-    CAMERA_BRIGHTNESS = 0.0  # -1.0 to 1.0
-    CAMERA_CONTRAST = 1.0    # 0.0 to 2.0
-    CAMERA_SATURATION = 1.0  # 0.0 to 2.0
+    # Camera adjustments for better image quality
+    CAMERA_BRIGHTNESS = 0.05  # Slight increase for better visibility
+    CAMERA_CONTRAST = 1.1    # Slight increase for better edges
+    CAMERA_SATURATION = 1.05  # Slight increase for color distinction
     
     # ======== AI Model Settings ========
     
     # YOLO Detection
-    YOLO_CONFIDENCE_THRESHOLD = 0.35  # Lower threshold for better detection
+    YOLO_CONFIDENCE_THRESHOLD = 0.32  # Slightly lower for better detection (from 0.35)
     YOLO_IOU_THRESHOLD = 0.45         # IoU threshold for NMS
-    YOLO_INPUT_SIZE = 320             # Reduced for faster inference (was 416)
+    YOLO_INPUT_SIZE = 416             # Increased for better accuracy (from 320)
     
     # MobileNetV2 Classification
     MOBILENET_INPUT_SIZE = 224       # Input size (224x224)
-    CLASSIFICATION_THRESHOLD = 0.6   # Minimum confidence for classification
+    CLASSIFICATION_THRESHOLD = 0.55   # Slightly lower threshold (from 0.6)
     
     # Class names - Fresh/Spoiled classification
     FRUIT_CLASSES = ['fresh', 'spoiled']  # tươi, hỏng
@@ -86,11 +86,16 @@ class Config:
     # ROI extraction
     ROI_PADDING = 10  # Pixels to pad around detection
     
-    # Preprocessing options (optimized for real-time)
-    FAST_PREPROCESSING = True  # Use fast mode for real-time processing
-    APPLY_BLUR = False         # Disabled for speed (was True)
-    BLUR_KERNEL_SIZE = 3       # Smaller kernel = faster
+    # Preprocessing options (balanced for accuracy/speed)
+    FAST_PREPROCESSING = True  # Keep fast mode but improved settings
+    APPLY_BLUR = True          # Enable blur for noise reduction
+    BLUR_KERNEL_SIZE = 3       # Small kernel for speed
     ENHANCE_CONTRAST = True    # CLAHE for better classification (critical for accuracy)
+    
+    # Image quality validation
+    CHECK_IMAGE_QUALITY = True         # Enable basic quality checks
+    MIN_IMAGE_BRIGHTNESS = 20          # Minimum acceptable brightness
+    MAX_IMAGE_BRIGHTNESS = 235         # Maximum acceptable brightness
     
     # HSV color filtering (optional, for specific scenarios)
     USE_HSV_FILTER = False
