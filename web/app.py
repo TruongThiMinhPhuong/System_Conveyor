@@ -104,7 +104,8 @@ class WebFruitSorter:
         global stats
         
         try:
-            if not self.detector.is_loaded:
+            # Check if detector exists and is loaded
+            if not self.detector or not self.detector.is_loaded:
                 return frame, None
             
             # Run detection
@@ -121,8 +122,8 @@ class WebFruitSorter:
                 'time': time.strftime('%H:%M:%S')
             }
             
-            # Classify if classifier loaded
-            if self.classifier.is_loaded:
+            # Classify if classifier exists and is loaded
+            if self.classifier and self.classifier.is_loaded:
                 bbox = detection['bbox']
                 preprocessed = self.preprocessor.preprocess_complete_pipeline(frame, bbox)
                 

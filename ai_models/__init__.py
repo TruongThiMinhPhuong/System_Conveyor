@@ -1,11 +1,9 @@
-"""AI Models package for fruit detection and classification"""
-
 from .preprocessing import ImagePreprocessor
-from .yolo_detector import YOLODetector
 from .mobilenet_classifier import MobileNetClassifier
 
-__all__ = [
-    'ImagePreprocessor',
-    'YOLODetector',
-    'MobileNetClassifier'
-]
+try:
+    from .yolo_detector import YOLODetector
+except:
+    YOLODetector = None
+
+__all__ = ['ImagePreprocessor', 'MobileNetClassifier', 'YOLODetector']

@@ -15,7 +15,7 @@ PICAMERA_AVAILABLE = False
 try:
     from picamera2 import Picamera2
     PICAMERA_AVAILABLE = True
-except ImportError as e:
+except Exception as e:
     print(f"⚠️ picamera2 not available: {e}")
     print("   Running in simulation mode (no real camera)")
     Picamera2 = None
